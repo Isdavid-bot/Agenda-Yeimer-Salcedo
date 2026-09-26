@@ -28,7 +28,7 @@ const DATOS = {
     instagramUsuario: "@elmejorbarberodemonteria",
     tiktok: "https://www.tiktok.com/@yeimersalced0",
     tiktokUsuario: "@yeimersalced0",
-    facebook: "https://www.facebook.com/PONER-ENLACE-REAL",   // ← PONER
+    facebook: "https://www.facebook.com/YeimerSalcedoOficial",   // ← PONER
     facebookNombre: "Las locuras del Yeimer"
   },
 
