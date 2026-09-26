@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0a">
+<meta name="robots" content="noindex">
+<title>Panel · Yeimer Salcedo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,300..900;1,62..125,300..900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0b0a;--bg-2:#121211;--bg-3:#1a1a18;--fg:#f2eee6;--fg-2:#a6a095;--fg-3:#6d6860;--line:rgba(242,238,230,.09);--line-2:rgba(242,238,230,.2);--accent:#c9a45c;--accent-2:#e2c285;--on-accent:#0b0b0a;--bad:#e0a090;--ok:#6fae7a;color-scheme:dark;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{overflow-x:hidden;width:100%;}
+body{background:var(--bg);color:var(--fg);font-family:'Archivo',ui-sans-serif,system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;padding-bottom:calc(76px + env(safe-area-inset-bottom,0px));overflow-x:hidden;width:100%;}
+button,input,select{font:inherit;color:inherit;}
+button{background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.display{font-stretch:62%;font-variation-settings:'wdth' 62;font-weight:800;text-transform:uppercase;letter-spacing:-.005em;line-height:.9;}
+.num{font-variant-numeric:tabular-nums;}
+.wrap{max-width:640px;margin:0 auto;padding:0 18px;}
+[hidden]{display:none!important;}
+
+/* ---- login ---- */
+#login{min-height:100svh;display:flex;align-items:center;justify-content:center;padding:24px;}
+#login .box{width:100%;max-width:320px;text-align:center;}
+#login h1{font-size:2rem;margin-bottom:6px;}
+#login p{color:var(--fg-2);font-size:.88rem;margin-bottom:26px;}
+#pin{width:100%;background:var(--bg-2);border:1px solid var(--line-2);border-radius:14px;padding:16px;text-align:center;font-size:1.6rem;letter-spacing:.3em;color:var(--fg);margin-bottom:14px;}
+#pin:focus{outline:none;border-color:var(--accent);}
+.err{color:var(--bad);font-size:.84rem;margin-bottom:10px;min-height:1.2em;}
+
+/* ---- shell ---- */
+#app{display:none;}
+#app.on{display:block;}
+header.top{position:sticky;top:0;z-index:20;background:rgba(11,11,10,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px);}
+.top-in{display:flex;align-items:center;justify-content:space-between;height:60px;}
+.brand{font-size:1.05rem;}
+.brand small{display:block;font-size:.66rem;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;font-weight:700;}
+.refresh{width:36px;height:36px;border-radius:50%;color:var(--fg-2);display:grid;place-items:center;}
+.refresh svg{width:18px;height:18px;}
+.refresh.spin svg{animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+main{padding:18px 0 20px;}
+.view{display:none;}
+.view.on{display:block;animation:fade .25s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(6px);}}
+h2.h{font-size:1.6rem;margin-bottom:4px;}
+.sub{color:var(--fg-2);font-size:.86rem;margin-bottom:18px;}
+
+/* ---- stat cards ---- */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:22px;}
+.stat{background:var(--bg-2);border:1px solid var(--line);border-radius:14px;padding:14px 10px;text-align:center;}
+.stat b{display:block;font-size:1.35rem;}
+.stat span{display:block;font-size:.66rem;color:var(--fg-3);text-transform:uppercase;letter-spacing:.08em;margin-top:4px;}
+
+/* ---- appointment cards ---- */
+.day-group{margin-bottom:22px;}
+.day-group h3{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:10px;}
+.cita{background:var(--bg-2);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:8px;}
+.cita-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;}
+.cita-hora{font-weight:700;font-size:1.05rem;}
+.cita-total{color:var(--accent);font-weight:600;font-size:.92rem;}
+.cita-nombre{font-size:.96rem;margin-top:4px;}
+.cita-info{font-size:.82rem;color:var(--fg-2);margin-top:4px;}
+.cita-actions{display:flex;gap:8px;margin-top:12px;}
+.pill{flex:1;height:38px;border-radius:999px;font-size:.82rem;font-weight:600;text-align:center;display:flex;align-items:center;justify-content:center;gap:6px;}
+.pill.wa{background:rgba(111,174,122,.12);color:var(--ok);}
+.pill.cancel{background:rgba(224,160,144,.1);color:var(--bad);}
+.empty{color:var(--fg-3);font-size:.9rem;text-align:center;padding:30px 10px;border:1px dashed var(--line-2);border-radius:14px;}
+
+/* ---- clientes ---- */
+.cliente{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);}
+.cliente:first-child{border-top:1px solid var(--line);}
+.cliente .n{font-weight:600;font-size:.95rem;}
+.cliente .m{font-size:.78rem;color:var(--fg-3);margin-top:2px;}
+.cliente .t{text-align:right;}
+.cliente .t b{display:block;color:var(--accent);}
+.cliente .t span{font-size:.72rem;color:var(--fg-3);}
+
+/* ---- catálogo editable ---- */
+.cat-item{background:var(--bg-2);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:10px;}
+.cat-item.off{opacity:.5;}
+.cat-row{display:grid;grid-template-columns:1fr 110px;gap:8px;margin-bottom:8px;}
+.cat-row2{display:grid;grid-template-columns:1fr 90px;gap:8px;}
+.f input{width:100%;background:var(--bg-3);border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font-size:.9rem;}
+.f input:focus{outline:none;border-color:var(--accent);}
+.cat-bottom{display:flex;gap:8px;margin-top:10px;align-items:center;}
+.switch{width:42px;height:24px;border-radius:999px;background:var(--bg-3);border:1px solid var(--line-2);position:relative;flex:none;}
+.switch b{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--fg-3);transition:.2s;}
+.switch.on{background:rgba(201,164,92,.25);border-color:var(--accent);}
+.switch.on b{left:20px;background:var(--accent);}
+.icon-btn{width:38px;height:38px;border-radius:10px;background:var(--bg-3);color:var(--fg-2);display:grid;place-items:center;}
+.icon-btn svg{width:16px;height:16px;}
+.add-cat{width:100%;height:46px;border:1px dashed var(--line-2);border-radius:14px;color:var(--fg-2);font-weight:600;margin:4px 0 20px;}
+.save-bar{position:sticky;bottom:calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;}
+.btn{height:48px;border-radius:999px;font-weight:700;padding:0 22px;flex:1;}
+.btn.gold{background:var(--accent);color:var(--on-accent);}
+.btn.gold:disabled{opacity:.4;}
+.toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translate(-50%,10px);background:var(--fg);color:var(--bg);padding:11px 18px;border-radius:12px;font-weight:600;font-size:.86rem;opacity:0;transition:.25s;z-index:60;white-space:nowrap;}
+.toast.show{opacity:1;transform:translate(-50%,0);}
+
+/* ---- ajustes ---- */
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3);margin-bottom:6px;}
+.field input,.field textarea{width:100%;background:var(--bg-2);border:1px solid var(--line-2);border-radius:12px;padding:13px 14px;font-size:.95rem;}
+.field textarea{min-height:70px;resize:vertical;}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--accent);}
+.field .hint2{font-size:.76rem;color:var(--fg-3);margin-top:6px;}
+.dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.dow button{aspect-ratio:1;border-radius:10px;background:var(--bg-2);border:1px solid var(--line-2);font-size:.72rem;font-weight:700;}
+.dow button.off{background:rgba(224,160,144,.12);border-color:rgba(224,160,144,.4);color:var(--bad);}
+.slot-edit{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.slot-edit .chip{background:var(--bg-2);border:1px solid var(--line-2);border-radius:999px;padding:8px 8px 8px 14px;font-size:.85rem;display:flex;align-items:center;gap:8px;}
+.slot-edit .chip button{color:var(--fg-3);font-size:1rem;}
+.add-slot{display:flex;gap:8px;margin-bottom:20px;}
+.add-slot input{flex:1;}
+.add-slot button{width:44px;background:var(--bg-2);border:1px solid var(--line-2);border-radius:10px;font-weight:700;color:var(--accent);}
+h3.grp{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin:24px 0 12px;}
+h3.grp:first-of-type{margin-top:0;}
+
+/* ---- tabs ---- */
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(11,11,10,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);}
+.tabs-in{display:flex;max-width:640px;margin:0 auto;}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 2px 8px;color:var(--fg-3);}
+.tab svg{width:20px;height:20px;}
+.tab span{font-size:.62rem;font-weight:600;letter-spacing:.02em;}
+.tab.on{color:var(--accent);}
+
+@media (min-width:720px){
+  .wrap{max-width:760px;}
+  .stats{grid-template-columns:repeat(3,220px);}
+}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="box">
+    <div class="display" style="font-size:.72rem;color:var(--accent);letter-spacing:.16em;margin-bottom:10px">Panel privado</div>
+    <h1 class="display">Yeimer Salcedo</h1>
+    <p>Ingresa tu PIN para entrar</p>
+    <input id="pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••" autocomplete="off">
+    <p class="err" id="loginErr"></p>
+    <button class="btn gold" id="loginBtn" style="width:100%">Entrar</button>
+  </div>
+</div>
+
+<div id="app">
+  <header class="top">
+    <div class="wrap top-in">
+      <div class="brand display">Panel<small>Yeimer Salcedo</small></div>
+      <button class="refresh" id="refreshBtn" aria-label="Actualizar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7M21 4v5h-5"/></svg></button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- HOY -->
+    <section class="view on" id="v-hoy">
+      <h2 class="h display">Hoy</h2>
+      <p class="sub" id="fechaHoy"></p>
+      <div class="stats">
+        <div class="stat"><b class="num" id="sHoyCitas">0</b><span>Citas hoy</span></div>
+        <div class="stat"><b class="num" id="sHoyIngresos">$0</b><span>Ingresos hoy</span></div>
+        <div class="stat"><b class="num" id="sSemCitas">0</b><span>Citas semana</span></div>
+      </div>
+      <div id="listaHoy"></div>
+    </section>
+
+    <!-- SEMANA -->
+    <section class="view" id="v-semana">
+      <h2 class="h display">Esta semana</h2>
+      <p class="sub">Próximos 7 días.</p>
+      <div id="listaSemana"></div>
+    </section>
+
+    <!-- CLIENTES -->
+    <section class="view" id="v-clientes">
+      <h2 class="h display">Clientes</h2>
+      <p class="sub">Ordenados por lo que han gastado contigo.</p>
+      <div id="listaClientes"></div>
+    </section>
+
+    <!-- CATALOGO -->
+    <section class="view" id="v-catalogo">
+      <h2 class="h display">Servicios y productos</h2>
+      <p class="sub">Cambia precios, agrega o apaga lo que quieras. Nada se borra: lo que apagues, deja de verse en la página.</p>
+      <h3 class="grp">Servicios</h3>
+      <div id="listaServicios"></div>
+      <button class="add-cat" data-add="servicio">+ Agregar servicio</button>
+      <h3 class="grp">Productos</h3>
+      <div id="listaProductos"></div>
+      <button class="add-cat" data-add="producto">+ Agregar producto</button>
+      <div class="save-bar"><button class="btn gold" id="guardarCatalogo">Guardar cambios</button></div>
+    </section>
+
+    <!-- AJUSTES -->
+    <section class="view" id="v-ajustes">
+      <h2 class="h display">Ajustes</h2>
+      <p class="sub">Tu horario, contacto y zona de trabajo.</p>
+
+      <h3 class="grp">Días que no trabajas</h3>
+      <div class="dow" id="dow"></div>
+
+      <h3 class="grp">Horas en que puede empezar una cita</h3>
+      <div class="slot-edit" id="slotEdit"></div>
+      <div class="add-slot"><input id="nuevaHora" type="time" step="900"><button id="agregarHora">+</button></div>
+
+      <h3 class="grp">Duración y anticipación</h3>
+      <div class="field"><label>Duración de cada cita (minutos)</label><input id="ajDuracion" type="number" min="15" step="15"></div>
+      <div class="field"><label>Anticipación mínima para reservar (minutos)</label><input id="ajAviso" type="number" min="0" step="15"></div>
+      <div class="field"><label>Hasta cuántos días adelante se puede agendar</label><input id="ajDiasAdelante" type="number" min="1" max="60"></div>
+
+      <h3 class="grp">Contacto y zona</h3>
+      <div class="field"><label>Tu WhatsApp</label><input id="ajWhatsapp" inputmode="tel" placeholder="57XXXXXXXXXX"></div>
+      <div class="field"><label>Correo donde te avisan las citas nuevas</label><input id="ajCorreo" type="email"></div>
+      <div class="field"><label>Zona de cobertura</label><input id="ajZona" placeholder="Montería y alrededores"></div>
+      <div class="field"><label>Nota bajo los servicios, en la página</label><textarea id="ajNota"></textarea></div>
+
+      <h3 class="grp">Seguridad</h3>
+      <div class="field"><label>Cambiar PIN del panel</label><input id="nuevoPin" inputmode="numeric" placeholder="Nuevo PIN (mínimo 4 dígitos)"><p class="hint2">Solo tú deberías conocer este PIN. Compártelo únicamente con quien maneje la página.</p></div>
+
+      <div class="save-bar"><button class="btn gold" id="guardarAjustes">Guardar ajustes</button></div>
+    </section>
+  </main>
+</div>
+
+<nav class="tabs" id="tabs" hidden>
+  <div class="tabs-in">
+    <button class="tab on" data-v="hoy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg><span>Hoy</span></button>
+    <button class="tab" data-v="semana"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 15h2M14 15h2"/></svg><span>Semana</span></button>
+    <button class="tab" data-v="clientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.5-4 4-5.6 7-5.6S18.5 16 20 20"/></svg><span>Clientes</span></button>
+    <button class="tab" data-v="catalogo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h9l7 7-9 9-7-7V4Z"/><circle cx="9" cy="9" r="1.4" fill="currentColor" stroke="none"/></svg><span>Carta</span></button>
+    <button class="tab" data-v="ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L14 3h-4l-.6 2.6a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9c.6.5 1.3.9 2 1.2L10 21h4l.6-2.6c.7-.3 1.4-.7 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2Z"/></svg><span>Ajustes</span></button>
+  </div>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script src="datos.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const API=(DATOS.agenda.apiUrl||'').trim();
+const cop=n=>'$'+Number(n||0).toLocaleString('es-CO');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DOW=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+let PIN=sessionStorage.getItem('yeimer_pin')||'';
+let panel=null;
+
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600);}
+async function llamar(body){
+  if(!API)throw new Error('Sin conexión con la agenda (falta agenda.apiUrl en datos.js).');
+  const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(body)});
+  return r.json();
+}
+
+/* ============================ login ============================ */
+async function entrar(){
+  const pin=$('pin').value.trim();
+  if(!pin){$('loginErr').textContent='Escribe tu PIN.';return;}
+  $('loginBtn').disabled=true;$('loginBtn').textContent='Entrando…';
+  try{
+    if(!API)throw {msg:'Falta conectar la agenda: pega la URL en datos.js (agenda.apiUrl).'};
+    const r=await fetch(`${API}?accion=panel&pin=${encodeURIComponent(pin)}`);
+    const d=await r.json();
+    if(d.error==='pin'){$('loginErr').textContent='PIN incorrecto.';return;}
+    if(d.error)throw {msg:'No se pudo entrar. Intenta de nuevo.'};
+    PIN=pin;sessionStorage.setItem('yeimer_pin',pin);panel=d;
+    $('login').style.display='none';$('app').classList.add('on');$('tabs').hidden=false;
+    pintarTodo();
+  }catch(e){$('loginErr').textContent=(e&&e.msg)||'No se pudo conectar. Revisa tu internet.';}
+  finally{$('loginBtn').disabled=false;$('loginBtn').textContent='Entrar';}
+}
+$('loginBtn').addEventListener('click',entrar);
+$('pin').addEventListener('keydown',e=>{if(e.key==='Enter')entrar();});
+
+async function recargar(){
+  $('refreshBtn').classList.add('spin');
+  try{
+    const r=await fetch(`${API}?accion=panel&pin=${encodeURIComponent(PIN)}`);
+    const d=await r.json();
+    if(d.error==='pin'){sessionStorage.removeItem('yeimer_pin');location.reload();return;}
+    panel=d;pintarTodo();
+  }catch(e){toast('No se pudo actualizar.');}
+  finally{$('refreshBtn').classList.remove('spin');}
+}
+$('refreshBtn').addEventListener('click',recargar);
+if(PIN){
+  // reintenta sesión guardada en este mismo dispositivo/pestaña
+  (async()=>{try{
+    const r=await fetch(`${API}?accion=panel&pin=${encodeURIComponent(PIN)}`);
+    const d=await r.json();
+    if(!d.error){panel=d;$('login').style.display='none';$('app').classList.add('on');$('tabs').hidden=false;pintarTodo();}
+  }catch(e){}})();
+}
+
+/* ============================ tabs ============================ */
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+t.dataset.v));
+  window.scrollTo({top:0,behavior:'instant'});
+}));
+
+/* ============================ pintar todo ============================ */
+function pintarTodo(){
+  pintarHoy();pintarSemana();pintarClientes();pintarCatalogo();pintarAjustes();
+}
+function fmtHora(d){d=new Date(d);const H=d.getHours(),M=d.getMinutes();return `${((H+11)%12)+1}:${String(M).padStart(2,'0')} ${H<12?'am':'pm'}`;}
+function fmtDiaCorto(d){d=new Date(d);return `${DOW[d.getDay()]} ${d.getDate()}`;}
+
+function tarjetaCita(c){
+  const wa=String(c.whatsapp||'').replace(/\D/g,'');
+  const msg=encodeURIComponent(`Hola ${(c.nombre||'').split(' ')[0]}, mi hermanito! Te confirmo tu cita: ${c.servicio} el ${fmtDiaCorto(c.ini)} a las ${fmtHora(c.ini)}. Dirección: ${c.direccion}. ¡Nos vemos! ✂️`);
+  return `<div class="cita" data-ev="${esc(c.eventoId)}">
+    <div class="cita-top"><span class="cita-hora num">${fmtHora(c.ini)}</span><span class="cita-total num">${cop(c.total)}</span></div>
+    <div class="cita-nombre">${esc(c.nombre)}</div>
+    <div class="cita-info">${esc(c.servicio)}${c.productos&&c.productos!=='Ninguno'?' · '+esc(c.productos):''}</div>
+    <div class="cita-info">${esc(c.direccion)}</div>
+    <div class="cita-actions">
+      ${wa?`<a class="pill wa" href="https://wa.me/${wa}?text=${msg}" target="_blank" rel="noopener">WhatsApp</a>`:''}
+      <button class="pill cancel" data-cancelar="${esc(c.eventoId)}">Cancelar</button>
+    </div>
+  </div>`;
+}
+function pintarHoy(){
+  $('fechaHoy').textContent=new Date().toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'});
+  $('sHoyCitas').textContent=panel.resumen.hoy.citas;
+  $('sHoyIngresos').textContent=cop(panel.resumen.hoy.ingresos);
+  $('sSemCitas').textContent=panel.resumen.semana.citas;
+  $('listaHoy').innerHTML=panel.hoy.length?panel.hoy.map(tarjetaCita).join(''):'<p class="empty">No tienes citas hoy.</p>';
+}
+function pintarSemana(){
+  if(!panel.semana.length){$('listaSemana').innerHTML='<p class="empty">No tienes citas esta semana.</p>';return;}
+  const grupos={};
+  panel.semana.forEach(c=>{const k=fmtDiaCorto(c.ini);(grupos[k]=grupos[k]||[]).push(c);});
+  $('listaSemana').innerHTML=Object.entries(grupos).map(([dia,lista])=>
+    `<div class="day-group"><h3>${dia}</h3>${lista.map(tarjetaCita).join('')}</div>`).join('');
+}
+function pintarClientes(){
+  if(!panel.clientes.length){$('listaClientes').innerHTML='<p class="empty">Todavía no tienes clientes registrados.</p>';return;}
+  $('listaClientes').innerHTML=panel.clientes.map(c=>`
+    <div class="cliente"><div><div class="n">${esc(c.nombre)}</div><div class="m">${c.visitas} visita${c.visitas>1?'s':''} · última el ${fmtDiaCorto(c.ultima)}</div></div>
+    <div class="t"><b class="num">${cop(c.total)}</b><span>en total</span></div></div>`).join('');
+}
+document.body.addEventListener('click',async e=>{
+  const b=e.target.closest('[data-cancelar]');if(!b)return;
+  if(!confirm('¿Cancelar esta cita? Si el cliente dejó correo, le llega el aviso de cancelación solo.'))return;
+  b.textContent='Cancelando…';b.disabled=true;
+  const r=await llamar({accion:'cancelar_cita',pin:PIN,eventoId:b.dataset.cancelar}).catch(()=>({ok:false}));
+  if(r.ok){toast('Cita cancelada.');recargar();}else{toast('No se pudo cancelar.');b.textContent='Cancelar';b.disabled=false;}
+});
+
+/* ============================ catálogo editable ============================ */
+let SERV=[],PROD=[];
+function filaServicio(s,i){
+  return `<div class="cat-item ${s.activo===false?'off':''}" data-i="${i}">
+   <div class="cat-row"><div class="f"><input data-k="nombre" value="${esc(s.nombre)}" placeholder="Nombre"></div><div class="f"><input data-k="precio" type="number" value="${s.precio}" placeholder="Precio"></div></div>
+   <div class="f" style="margin-bottom:8px"><input data-k="incluye" value="${esc(s.incluye)}" placeholder="Qué incluye (ej: Corte + barba)"></div>
+   <div class="cat-row2"><div class="f"><input data-k="etiqueta" value="${esc(s.etiqueta||'')}" placeholder="Etiqueta (opcional, ej: Todo)"></div>
+    <div class="cat-bottom" style="margin:0"><button class="switch ${s.activo===false?'':'on'}" data-toggle><b></b></button><button class="icon-btn" data-del title="Eliminar de la lista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button></div>
+   </div></div>`;
+}
+function filaProducto(p,i){
+  return `<div class="cat-item ${p.activo===false?'off':''}" data-i="${i}">
+   <div class="cat-row"><div class="f"><input data-k="nombre" value="${esc(p.nombre)}" placeholder="Nombre"></div><div class="f"><input data-k="precio" type="number" value="${p.precio}" placeholder="Precio"></div></div>
+   <div class="cat-row2"><div class="f"><input data-k="detalle" value="${esc(p.detalle||'')}" placeholder="Detalle (ej: fijación alta)"></div>
+    <div class="cat-bottom" style="margin:0"><button class="switch ${p.activo===false?'':'on'}" data-toggle><b></b></button><button class="icon-btn" data-del title="Eliminar de la lista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button></div>
+   </div></div>`;
+}
+function pintarCatalogo(){
+  SERV=panel.servicios.map(s=>({...s}));PROD=panel.productos.map(p=>({...p}));
+  redibujarCatalogo();
+}
+function redibujarCatalogo(){
+  $('listaServicios').innerHTML=SERV.map(filaServicio).join('')||'<p class="empty">Sin servicios todavía.</p>';
+  $('listaProductos').innerHTML=PROD.map(filaProducto).join('')||'<p class="empty">Sin productos todavía.</p>';
+}
+document.body.addEventListener('input',e=>{
+  const item=e.target.closest('.cat-item');if(!item||!e.target.dataset.k)return;
+  const lista=item.parentElement.id==='listaServicios'?SERV:PROD;
+  const i=+item.dataset.i,k=e.target.dataset.k;
+  lista[i][k]=k==='precio'?Number(e.target.value)||0:e.target.value;
+});
+document.body.addEventListener('click',e=>{
+  const item=e.target.closest('.cat-item');if(!item)return;
+  const lista=item.parentElement.id==='listaServicios'?SERV:PROD;
+  const i=+item.dataset.i;
+  if(e.target.closest('[data-toggle]')){lista[i].activo=lista[i].activo===false;redibujarCatalogo();}
+  if(e.target.closest('[data-del]')){if(confirm('¿Quitar esto de la lista? (Si prefieres solo ocultarlo, usa el interruptor en vez de eliminar.)')){lista.splice(i,1);redibujarCatalogo();}}
+});
+document.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{
+  if(b.dataset.add==='servicio')SERV.push({id:'',nombre:'Nuevo servicio',incluye:'',precio:0,etiqueta:'',activo:true});
+  else PROD.push({id:'',nombre:'Nuevo producto',detalle:'',precio:0,activo:true});
+  redibujarCatalogo();
+}));
+$('guardarCatalogo').addEventListener('click',async()=>{
+  const btn=$('guardarCatalogo');btn.disabled=true;btn.textContent='Guardando…';
+  try{
+    const r1=await llamar({accion:'guardar_servicios',pin:PIN,filas:SERV});
+    const r2=await llamar({accion:'guardar_productos',pin:PIN,filas:PROD});
+    if(r1.ok&&r2.ok){toast('Guardado. Ya se ve así en la página.');recargar();}else toast('Algo falló guardando.');
+  }catch(e){toast('No se pudo guardar. Revisa tu internet.');}
+  finally{btn.disabled=false;btn.textContent='Guardar cambios';}
+});
+
+/* ============================ ajustes ============================ */
+let cerrados=[];
+function pintarAjustes(){
+  const a=panel.ajustes;
+  cerrados=(a.dias_cerrados||'').split(',').map(s=>Number(s.trim())).filter(n=>!isNaN(n));
+  $('dow').innerHTML=DOW.map((d,i)=>`<button data-d="${i}" class="${cerrados.includes(i)?'off':''}">${d}</button>`).join('');
+  const horas=(a.horas_inicio||'').split(',').map(s=>s.trim()).filter(Boolean);
+  pintarHoras(horas);
+  $('ajDuracion').value=a.duracion_min;$('ajAviso').value=a.aviso_min;$('ajDiasAdelante').value=a.dias_adelante;
+  $('ajWhatsapp').value=a.whatsapp||'';$('ajCorreo').value=a.correo_avisos||'';$('ajZona').value=a.zona_cobertura||'';$('ajNota').value=a.nota_servicios||'';
+  $('nuevoPin').value='';
+}
+function pintarHoras(horas){
+  horas.sort();
+  $('slotEdit').innerHTML=horas.map(h=>`<span class="chip" data-h="${h}">${h}<button data-quitar-hora>✕</button></span>`).join('')||'<p class="empty" style="padding:14px">Sin horas configuradas.</p>';
+  $('slotEdit').dataset.horas=JSON.stringify(horas);
+}
+$('dow').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  const d=+b.dataset.d;
+  cerrados=cerrados.includes(d)?cerrados.filter(x=>x!==d):[...cerrados,d];
+  b.classList.toggle('off',cerrados.includes(d));
+});
+$('agregarHora').addEventListener('click',()=>{
+  const v=$('nuevaHora').value;if(!v)return;
+  const horas=JSON.parse($('slotEdit').dataset.horas||'[]');
+  if(!horas.includes(v))horas.push(v);
+  pintarHoras(horas);$('nuevaHora').value='';
+});
+$('slotEdit').addEventListener('click',e=>{
+  if(!e.target.closest('[data-quitar-hora]'))return;
+  const chip=e.target.closest('.chip');
+  const horas=JSON.parse($('slotEdit').dataset.horas||'[]').filter(h=>h!==chip.dataset.h);
+  pintarHoras(horas);
+});
+$('guardarAjustes').addEventListener('click',async()=>{
+  const btn=$('guardarAjustes');btn.disabled=true;btn.textContent='Guardando…';
+  try{
+    const horas=JSON.parse($('slotEdit').dataset.horas||'[]');
+    const valores={
+      dias_cerrados:cerrados.join(','), horas_inicio:horas.join(','),
+      duracion_min:$('ajDuracion').value, aviso_min:$('ajAviso').value, dias_adelante:$('ajDiasAdelante').value,
+      whatsapp:$('ajWhatsapp').value.replace(/\D/g,''), correo_avisos:$('ajCorreo').value.trim(),
+      zona_cobertura:$('ajZona').value.trim(), nota_servicios:$('ajNota').value.trim()
+    };
+    const r=await llamar({accion:'guardar_ajustes',pin:PIN,valores});
+    let ok=r.ok;
+    const np=$('nuevoPin').value.trim();
+    if(ok&&np){const r2=await llamar({accion:'guardar_pin',pin:PIN,nuevoPin:np});if(r2.ok){PIN=np;sessionStorage.setItem('yeimer_pin',PIN);}else ok=false;}
+    if(ok){toast('Ajustes guardados.');recargar();}else toast('Algo falló guardando.');
+  }catch(e){toast('No se pudo guardar. Revisa tu internet.');}
+  finally{btn.disabled=false;btn.textContent='Guardar ajustes';}
+});
+</script>
+</body>
+</html>

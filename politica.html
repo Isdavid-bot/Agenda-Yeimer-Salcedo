@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Política de tratamiento de datos — Yeimer Salcedo</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0b0a;--fg:#f2eee6;--fg-2:#a6a095;--line:rgba(242,238,230,.1);--accent:#c9a45c;color-scheme:dark;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{overflow-x:hidden;width:100%;}
+body{background:var(--bg);color:var(--fg);font-family:'Archivo',system-ui,sans-serif;line-height:1.65;padding:calc(32px + env(safe-area-inset-top,0px)) 20px calc(48px + env(safe-area-inset-bottom,0px));overflow-x:hidden;width:100%;}
+main{max-width:680px;margin:0 auto;}
+a{color:var(--accent);}
+.back{display:inline-block;font-size:.86rem;margin-bottom:28px;text-decoration:none;}
+h1{font-stretch:62%;font-weight:800;text-transform:uppercase;font-size:clamp(2.2rem,9vw,3.4rem);line-height:.92;}
+h2{font-size:1rem;margin:30px 0 8px;color:var(--accent);}
+p,li{color:var(--fg-2);font-size:.95rem;}
+ul{padding-left:20px;display:grid;gap:4px;}
+.meta{margin-top:14px;font-size:.82rem;color:var(--fg-2);}
+</style>
+</head>
+<body>
+<main>
+<a class="back" href="index.html">← Volver</a>
+<h1>Política de tratamiento de datos personales</h1>
+<p class="meta">Ley 1581 de 2012 y normas que la reglamentan · Vigente desde el 22 de septiembre de 2026</p>
+
+<h2>Responsable</h2>
+<p><b id="rNombre">Yeimer Salcedo</b>, barbero a domicilio con domicilio en Montería, Córdoba, Colombia. Contacto: WhatsApp <span id="rWa">—</span><span id="rMail"></span>.</p>
+
+<h2>Qué datos recogemos</h2>
+<p>Al agendar una cita en esta página: nombre, número de WhatsApp, dirección donde se presta el servicio, correo electrónico (opcional), el servicio y productos escogidos, y las notas que quieras dejar.</p>
+
+<h2>Para qué los usamos</h2>
+<ul>
+<li>Agendar tu cita y llegar a la dirección indicada.</li>
+<li>Enviarte la confirmación y el recordatorio de la cita por correo o WhatsApp.</li>
+<li>Comunicarnos contigo sobre cambios, cancelaciones o detalles del servicio.</li>
+<li>Llevar el registro interno de citas atendidas.</li>
+</ul>
+<p>No vendemos ni compartimos tus datos con terceros para publicidad. Se almacenan en las herramientas de Google (Calendar, Hojas de cálculo y Gmail) de la cuenta del responsable.</p>
+
+<h2>Tus derechos</h2>
+<p>Como titular puedes, en cualquier momento y sin costo:</p>
+<ul>
+<li>Conocer, actualizar y rectificar tus datos.</li>
+<li>Pedir prueba de la autorización que diste.</li>
+<li>Saber qué uso se les ha dado.</li>
+<li>Revocar la autorización o pedir que se eliminen, cuando no exista un deber legal de conservarlos.</li>
+<li>Presentar quejas ante la Superintendencia de Industria y Comercio.</li>
+</ul>
+
+<h2>Cómo ejercerlos</h2>
+<p>Escríbenos por WhatsApp o correo indicando tu nombre, tu número y lo que solicitas. Las consultas se responden en un máximo de 10 días hábiles y los reclamos en un máximo de 15 días hábiles, según la ley.</p>
+
+<h2>Vigencia</h2>
+<p>Los datos se conservan mientras sean necesarios para las finalidades descritas o hasta que solicites su eliminación. Cualquier cambio a esta política se publicará en esta página.</p>
+</main>
+<script src="datos.js"></script>
+<script>
+const C=DATOS.contacto,w=String(C.whatsapp||'').replace(/\D/g,'');
+document.getElementById('rNombre').textContent=DATOS.marca.nombre;
+if(w.length>=10){const a=document.getElementById('rWa');a.innerHTML=`<a href="https://wa.me/${w}">+${w}</a>`;}
+if(C.correo)document.getElementById('rMail').innerHTML=` · correo <a href="mailto:${C.correo}">${C.correo}</a>`;
+</script>
+</body>
+</html>
