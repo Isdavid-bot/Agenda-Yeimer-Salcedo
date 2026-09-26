@@ -265,6 +265,7 @@ async function entrar(){
     const r=await fetch(`${API}?accion=panel&pin=${encodeURIComponent(pin)}`);
     const d=await r.json();
     if(d.error==='pin'){$('loginErr').textContent='PIN incorrecto.';return;}
+    if(d.error==='bloqueado'){$('loginErr').textContent='Demasiados intentos. Espera unos 15 minutos e intenta de nuevo.';return;}
     if(d.error)throw {msg:'No se pudo entrar. Intenta de nuevo.'};
     PIN=pin;sessionStorage.setItem('yeimer_pin',pin);panel=d;
     $('login').style.display='none';$('app').classList.add('on');$('tabs').hidden=false;
@@ -280,6 +281,7 @@ async function recargar(){
   try{
     const r=await fetch(`${API}?accion=panel&pin=${encodeURIComponent(PIN)}`);
     const d=await r.json();
+    if(d.error==='bloqueado'){toast('Demasiados intentos recientes. Espera unos minutos.');return;}
     if(d.error==='pin'){sessionStorage.removeItem('yeimer_pin');location.reload();return;}
     panel=d;pintarTodo();
   }catch(e){toast('No se pudo actualizar.');}

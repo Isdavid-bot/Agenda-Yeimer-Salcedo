@@ -138,7 +138,8 @@ function doGet(e) {
       return json_({ libres: horasLibres_(p.fecha) });
     }
     if (p.accion === 'panel') {
-      if (!pinValido_(p.pin)) return json_({ ok: false, error: 'pin' });
+      const estado = estadoAcceso_(p.pin);
+      if (estado !== 'ok') return json_({ ok: false, error: estado });
       return json_(datosPanel_());
     }
     return json_({ ok: true, servicio: 'Agenda Yeimer' });
@@ -282,14 +283,27 @@ function horasLibres_(fecha, ag) {
 /* =============================================================================
    PANEL DE ADMINISTRACIÓN (admin.html) — todo protegido con PIN
    ============================================================================= */
-function pinValido_(pin) {
+// Freno de fuerza bruta: 8 intentos fallidos en 15 min bloquean el panel otros 15 min.
+// No distingue por dispositivo (Apps Script no expone la IP de quien llama), pero
+// basta para que probar las 10.000 combinaciones de un PIN de 4 dígitos sea
+// impráctico. Mientras más largo el PIN, más inútil se vuelve intentar adivinarlo.
+function estadoAcceso_(pin) {
+  const cache = CacheService.getScriptCache();
+  if (Date.now() < Number(cache.get('admin_bloqueo') || 0)) return 'bloqueado';
+
   const real = String(ajuste_('pin_admin') || POR_DEFECTO.pin_admin).trim();
-  return !!pin && String(pin).trim() === real;
+  if (pin && String(pin).trim() === real) { cache.remove('admin_intentos'); return 'ok'; }
+
+  const intentos = Number(cache.get('admin_intentos') || 0) + 1;
+  cache.put('admin_intentos', String(intentos), 900);
+  if (intentos >= 8) cache.put('admin_bloqueo', String(Date.now() + 15 * 60000), 900);
+  return 'pin';
 }
 
 function accionPanel_(d) {
   try {
-    if (!pinValido_(d.pin)) return json_({ ok: false, error: 'pin' });
+    const estado = estadoAcceso_(d.pin);
+    if (estado !== 'ok') return json_({ ok: false, error: estado });
     switch (d.accion) {
       case 'guardar_pin':       return guardarPin_(d);
       case 'guardar_ajustes':   return guardarAjustes_(d);
