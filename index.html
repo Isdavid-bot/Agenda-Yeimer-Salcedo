@@ -15,6 +15,8 @@
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230b0b0a%22/><text x=%2250%22 y=%2268%22 font-size=%2248%22 text-anchor=%22middle%22 fill=%22%23c9a45c%22 font-family=%22Arial Black,Arial%22 font-weight=%22900%22>YS</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com">
 <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,300..900;1,62..125,300..900&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -433,16 +435,20 @@ $('txtMarca').textContent=M.nombre;
   if(lista.length<2)return;
   const cont=primera.parentElement;
   const imgs=[primera];
-  lista.slice(1).forEach(f=>{
+  // Las demás fotos se piden cuando la página ya terminó de cargar, para no competir con la primera
+  const cargarResto=()=>lista.slice(1).forEach(f=>{
     const im=new Image();im.alt=alt;im.decoding='async';
     if(f.pos)im.style.objectPosition=f.pos;
     im.src=f.src;cont.appendChild(im);imgs.push(im);
   });
+  if(document.readyState==='complete')setTimeout(cargarResto,400);
+  else addEventListener('load',()=>setTimeout(cargarResto,400),{once:true});
   // Con "reducir movimiento" activado (en Windows pasa si los efectos de animación están apagados),
   // las fotos igual cambian, pero de golpe, sin fundido: el CSS ya quita la transición.
   const SEGUNDOS=Math.max(3,Number(M.fotosSegundos)||5);
   let i=0,timer=null;
   const siguiente=()=>{
+    if(imgs.length<2)return;                                 // la segunda foto aún no se ha pedido
     const j=(i+1)%imgs.length;
     if(!imgs[j].complete||!imgs[j].naturalWidth)return;     // aún cargando: espera al próximo turno
     imgs[i].classList.remove('on');imgs[j].classList.add('on');i=j;
@@ -480,20 +486,38 @@ function pintarCatalogo(){
   $('extras').hidden=!PRODUCTS.length;
   sync();
 }
+const CLAVE_CAT='yeimer_catalogo_v1';
+let agendaFirma='';
+function aplicarCatalogo(d){
+  SERVICES=d.servicios;PRODUCTS=d.productos||[];
+  if(d.agenda){DUR=d.agenda.duracion||DUR;if(Array.isArray(d.agenda.inicios))SLOTS=d.agenda.inicios;}
+  const aj=d.ajustes||{};
+  if(aj.whatsapp)WA=aj.whatsapp;
+  $('txtNota').textContent=aj.nota_servicios||R.nota;
+  const firma=JSON.stringify([d.agenda&&d.agenda.diasAdelante,d.agenda&&d.agenda.diasCerrados]);
+  if(firma!==agendaFirma){agendaFirma=firma;construirDias(d.agenda&&d.agenda.diasAdelante,d.agenda&&d.agenda.diasCerrados);}
+  if(st.svc&&!SERVICES.some(s=>s.id===st.svc)){st.svc=null;st.slot=null;}   // el corte que había escogido ya no existe
+  pintarCatalogo();
+}
 async function cargarCatalogo(){
-  const usarRespaldo=()=>{SERVICES=R.servicios;PRODUCTS=R.productos;$('txtNota').textContent=R.nota;};
-  if(!API){usarRespaldo();return pintarCatalogo();}
+  const usarRespaldo=()=>{SERVICES=R.servicios;PRODUCTS=R.productos;$('txtNota').textContent=R.nota;pintarCatalogo();};
+  if(!API){usarRespaldo();return;}
+  // 1) Si ya lo había visto antes, lo muestra al instante mientras trae la versión fresca
+  let conCache=false;
+  try{
+    const g=JSON.parse(localStorage.getItem(CLAVE_CAT)||'null');
+    if(g&&Array.isArray(g.servicios)&&g.servicios.length){aplicarCatalogo(g);conCache=true;}
+  }catch(e){}
+  // 2) Trae el catálogo fresco (y lo guarda para la próxima visita)
   try{
     const d=await pedir(`${API}?accion=catalogo`);
     if(!d||!Array.isArray(d.servicios))throw new Error('catálogo inválido');
-    SERVICES=d.servicios;PRODUCTS=d.productos||[];
-    if(d.agenda){DUR=d.agenda.duracion||DUR;if(Array.isArray(d.agenda.inicios))SLOTS=d.agenda.inicios;}
-    const aj=d.ajustes||{};
-    if(aj.whatsapp)WA=aj.whatsapp;
-    $('txtNota').textContent=aj.nota_servicios||R.nota;
-    construirDias(d.agenda&&d.agenda.diasAdelante,d.agenda&&d.agenda.diasCerrados);
-  }catch(e){console.warn('Usando catálogo de respaldo',e);usarRespaldo();}
-  pintarCatalogo();
+    aplicarCatalogo(d);
+    try{localStorage.setItem(CLAVE_CAT,JSON.stringify(d));}catch(e){}
+  }catch(e){
+    console.warn('No se pudo traer el catálogo fresco',e);
+    if(!conCache)usarRespaldo();            // si ya mostró el de la última vez, ese se queda
+  }
 }
 $('svcList').addEventListener('click',e=>{
   const b=e.target.closest('.svc');if(!b)return;

@@ -25,6 +25,8 @@ apps-script/Codigo.gs Código que va en la Hoja de Google de Yeimer
 
 Los cambios, sea desde el panel o desde la hoja, se ven en la página **de inmediato**, sin subir nada a GitHub.
 
+> **Velocidad:** para que la página cargue rápido, el servidor guarda el catálogo 5 minutos en la memoria de Google. Esa memoria se borra sola cuando guardas cambios en el Panel o editas la hoja a mano, así que lo normal es que veas el cambio al instante. Si por alguna razón Google no avisa de una edición hecha en la hoja (a veces pasa con pegados grandes o ediciones desde otras apps), el cambio aparece a más tardar a los 5 minutos.
+
 ### El Panel de Yeimer (`admin.html`)
 
 Es una página aparte, protegida con un **PIN de 4 a 8 dígitos**, pensada para el celular. Yeimer entra ahí — no a la hoja de cálculo — para el día a día:
