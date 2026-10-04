@@ -18,17 +18,19 @@ const DATOS = {
     frase: "Mi hermanito, yo llego donde tú digas con todo mi equipo y la capa. Escoge tu corte, aparta tu hora y listo.",
     beneficios: ["Visita gratis en Montería", "Citas de 90 min"],
     despedida: ["Nos vemos pronto,", "mi hermanito."],
-    foto: "fotos/yeimer.jpg"
+    fotos: ["fotos/yeimer-1.jpg", "fotos/yeimer-2.jpg", "fotos/yeimer-3.jpg"],
+    fotosSegundos: 3,
+    foto: "fotos/yeimer-1.jpg"
   },
 
   contacto: {
     whatsapp: "57XXXXXXXXXX",   // solo para modo demo; el real va en la hoja (Ajustes)
     correo: "",                  // correo de Yeimer para la política de datos
-    instagram: "https://www.instagram.com/elmejorbarberodemonteria",
-    instagramUsuario: "@elmejorbarberodemonteria",
-    tiktok: "https://www.tiktok.com/@yeimersalced0",
-    tiktokUsuario: "@yeimersalced0",
-    facebook: "https://www.facebook.com/YeimerSalcedoOficial",   // ← PONER
+    instagram: "https://www.instagram.com/yeimersalcedooficial",
+    instagramUsuario: "@yeimersalcedooficial",
+    tiktok: "https://www.tiktok.com/@yeimersalcedooficial",
+    tiktokUsuario: "@yeimersalcedooficial",
+    facebook: "https://www.facebook.com/yeimer.salcedo.2025/",   // ← PONER
     facebookNombre: "Yeimer Salcedo El mejor barbero de Monteria"
   },
 
