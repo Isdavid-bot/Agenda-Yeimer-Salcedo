@@ -31,7 +31,9 @@ Es una página aparte, protegida con un **PIN de 4 a 8 dígitos**, pensada para 
 
 - **Hoy / Semana:** sus citas con hora, cliente, dirección y total. Cada una tiene un botón para escribirle por WhatsApp (con el mensaje ya armado) y otro para **cancelarla** (si el cliente dejó correo, a él le llega la cancelación automáticamente, sin que Yeimer haga nada más).
 - **Clientes:** todos los que le han pagado, ordenados por cuánto le han dejado en total — así ve de un vistazo quiénes son sus clientes frecuentes.
-- **Carta:** editar precios, agregar o apagar servicios y productos. "Apagar" (el interruptor) los oculta de la página sin borrar el historial; "Eliminar" sí los quita de la lista.
+- **Carta:** editar precios, agregar o apagar servicios y productos. Cada servicio tiene dos campos opcionales:
+  - **Duración (minutos):** si lo dejas vacío, dura lo normal de una cita (90 min). Si pones, por ejemplo, 30, ese servicio se ofrece cada 30 minutos dentro de la jornada, y solo bloquea esos 30 minutos en el Calendar.
+  - **Precio máx.:** si lo llenas, la página muestra "desde $20.000 · hasta $25.000", el total sale como "Total desde…" y el Calendar y los correos dicen "desde … (hasta …, según el trabajo)". En los ingresos del Panel se suma el precio base. Si algún día el servicio tiene un solo precio, borra este campo. "Apagar" (el interruptor) los oculta de la página sin borrar el historial; "Eliminar" sí los quita de la lista.
 - **Ajustes:** qué días no trabaja, a qué horas puede empezar una cita, cuánto dura cada una, la anticipación mínima, su WhatsApp, el correo donde le llegan los avisos, la zona de cobertura y el texto de nota en la página. También puede cambiar el PIN ahí mismo.
 
 El PIN que trae por defecto es `1234` — es lo primero que hay que cambiar, en *Ajustes → Seguridad*. Como es solo un PIN (no un usuario con contraseña de verdad), no lo compartas fuera del círculo de confianza; para una barbería es un nivel de protección razonable, no bancario.

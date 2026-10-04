@@ -86,6 +86,7 @@ h2.h{font-size:1.6rem;margin-bottom:4px;}
 .cat-row2{display:grid;grid-template-columns:1fr 90px;gap:8px;}
 .f input{width:100%;background:var(--bg-3);border:1px solid var(--line-2);border-radius:10px;padding:10px 12px;font-size:.9rem;}
 .f input:focus{outline:none;border-color:var(--accent);}
+.f label.mini{display:block;font-size:.66rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3);margin:0 0 4px 2px;}
 .cat-bottom{display:flex;gap:8px;margin-top:10px;align-items:center;}
 .switch{width:42px;height:24px;border-radius:999px;background:var(--bg-3);border:1px solid var(--line-2);position:relative;flex:none;}
 .switch b{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--fg-3);transition:.2s;}
@@ -185,7 +186,7 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(11,11
     <!-- CATALOGO -->
     <section class="view" id="v-catalogo">
       <h2 class="h display">Servicios y productos</h2>
-      <p class="sub">Cambia precios, agrega o apaga lo que quieras. Nada se borra: lo que apagues, deja de verse en la página.</p>
+      <p class="sub">Cambia precios, agrega o apaga lo que quieras. Nada se borra: lo que apagues, deja de verse en la página. Si dejas la duración vacía, el servicio dura lo normal de una cita. Si llenas "Precio máx.", la página muestra "desde … hasta …".</p>
       <h3 class="grp">Servicios</h3>
       <div id="listaServicios"></div>
       <button class="add-cat" data-add="servicio">+ Agregar servicio</button>
@@ -359,6 +360,10 @@ function filaServicio(s,i){
   return `<div class="cat-item ${s.activo===false?'off':''}" data-i="${i}">
    <div class="cat-row"><div class="f"><input data-k="nombre" value="${esc(s.nombre)}" placeholder="Nombre"></div><div class="f"><input data-k="precio" type="number" value="${s.precio}" placeholder="Precio"></div></div>
    <div class="f" style="margin-bottom:8px"><input data-k="incluye" value="${esc(s.incluye)}" placeholder="Qué incluye (ej: Corte + barba)"></div>
+   <div class="cat-row" style="margin-bottom:8px">
+     <div class="f"><label class="mini">Duración (minutos)</label><input data-k="duracion" type="number" min="10" step="5" value="${s.duracion||''}" placeholder="Normal: ${panel.ajustes.duracion_min}"></div>
+     <div class="f"><label class="mini">Precio máx.</label><input data-k="precioMax" type="number" min="0" step="1000" value="${s.precioMax||''}" placeholder="Opcional"></div>
+   </div>
    <div class="cat-row2"><div class="f"><input data-k="etiqueta" value="${esc(s.etiqueta||'')}" placeholder="Etiqueta (opcional, ej: Todo)"></div>
     <div class="cat-bottom" style="margin:0"><button class="switch ${s.activo===false?'':'on'}" data-toggle><b></b></button><button class="icon-btn" data-del title="Eliminar de la lista"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg></button></div>
    </div></div>`;
@@ -382,7 +387,7 @@ document.body.addEventListener('input',e=>{
   const item=e.target.closest('.cat-item');if(!item||!e.target.dataset.k)return;
   const lista=item.parentElement.id==='listaServicios'?SERV:PROD;
   const i=+item.dataset.i,k=e.target.dataset.k;
-  lista[i][k]=k==='precio'?Number(e.target.value)||0:e.target.value;
+  lista[i][k]=(k==='precio'||k==='precioMax'||k==='duracion')?Number(e.target.value)||0:e.target.value;
 });
 document.body.addEventListener('click',e=>{
   const item=e.target.closest('.cat-item');if(!item)return;
@@ -392,7 +397,7 @@ document.body.addEventListener('click',e=>{
   if(e.target.closest('[data-del]')){if(confirm('¿Quitar esto de la lista? (Si prefieres solo ocultarlo, usa el interruptor en vez de eliminar.)')){lista.splice(i,1);redibujarCatalogo();}}
 });
 document.querySelectorAll('[data-add]').forEach(b=>b.addEventListener('click',()=>{
-  if(b.dataset.add==='servicio')SERV.push({id:'',nombre:'Nuevo servicio',incluye:'',precio:0,etiqueta:'',activo:true});
+  if(b.dataset.add==='servicio')SERV.push({id:'',nombre:'Nuevo servicio',incluye:'',precio:0,precioMax:0,duracion:0,etiqueta:'',activo:true});
   else PROD.push({id:'',nombre:'Nuevo producto',detalle:'',precio:0,activo:true});
   redibujarCatalogo();
 }));

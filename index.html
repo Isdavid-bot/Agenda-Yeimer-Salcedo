@@ -93,7 +93,9 @@ a{color:inherit;text-decoration:none;}
 .svc-name{display:block;font-weight:700;font-size:1.02rem;}
 .svc-inc{display:block;font-size:.8rem;color:var(--fg-2);margin-top:3px;}
 .svc-inc b{color:var(--accent);font-weight:600;}
-.svc-price{font-size:1.9rem;}
+.svc-price{font-size:1.9rem;text-align:right;}
+.svc-price small{display:block;font-stretch:100%;font-variation-settings:'wdth' 100;font-weight:500;font-size:.72rem;letter-spacing:0;text-transform:none;line-height:1.3;color:var(--fg-2);margin-top:5px;}
+.sum-sub{font-size:.76rem;color:var(--fg-3);margin-top:8px;text-align:right;}
 .tag{display:inline-block;font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:var(--accent);color:var(--on-accent);border-radius:999px;padding:3px 7px;margin-left:6px;vertical-align:2px;}
 .svc[aria-checked="true"]{border-color:var(--accent);background:linear-gradient(120deg,rgba(201,164,92,.12),rgba(201,164,92,.02) 70%),var(--bg-2);}
 .svc[aria-checked="true"] .radio{border-color:var(--accent);background:var(--accent);}
@@ -308,7 +310,7 @@ footer{padding:28px 0 calc(110px + env(safe-area-inset-bottom,0px));}
       </section>
 
       <section class="step" id="cuando">
-        <div class="step-head"><span class="step-n">3</span><div><h2 class="display">Día y hora</h2><p>Horas libres de mi calendario. Cada cita dura <span id="txtDur">90</span> minutos.</p></div></div>
+        <div class="step-head"><span class="step-n">3</span><div><h2 class="display">Día y hora</h2><p id="txtDurP">Horas libres de mi calendario. Escoge primero tu corte.</p></div></div>
         <div class="days" id="days"></div>
         <div id="slots"><p class="hint">Escoge un día para ver mis horas libres.</p></div>
       </section>
@@ -334,7 +336,8 @@ footer{padding:28px 0 calc(110px + env(safe-area-inset-bottom,0px));}
         <div><span>Día</span><span id="sumDay">—</span></div>
         <div><span>Hora</span><span id="sumSlot">—</span></div>
       </div>
-      <div class="sum-total"><small>Total</small><b class="display num" id="sumTotal">$0</b></div>
+      <div class="sum-total"><small id="sumTotalLbl">Total</small><b class="display num" id="sumTotal">$0</b></div>
+      <p class="sum-sub" id="sumSub" hidden></p>
       <button class="btn cta-main pending" id="ctaDesk">Escoge tu corte</button>
       <p class="err-msg" id="errDesk" hidden></p>
       <div class="sync"><i></i>Se agenda en mi Google Calendar</div>
@@ -389,6 +392,8 @@ const ICONS={
 document.querySelectorAll('svg[data-i]').forEach(s=>s.outerHTML=ICONS[s.dataset.i]);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const cop=n=>'$'+Number(n||0).toLocaleString('es-CO');
+const hayRango=s=>!!s&&s.precioMax>s.precio;
+const precioTxt=s=>hayRango(s)?`${cop(s.precio)} – ${cop(s.precioMax)}`:cop(s.precio);
 const aMin=t=>{const[a,b]=String(t).split(':');return +a*60 + +b;};
 const hm=m=>{const H=Math.floor(m/60),M=m%60;return `${((H+11)%12)+1}:${String(M).padStart(2,'0')} ${H<12?'am':'pm'}`;};
 const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -404,6 +409,16 @@ async function pedir(url,opts={},ms=15000){
 const M=DATOS.marca,C=DATOS.contacto,A=DATOS.agenda,R=DATOS.respaldo;
 const API=(A.apiUrl||'').trim();
 let SERVICES=[],PRODUCTS=[],DUR=R.duracion,SLOTS=R.inicios.map(aMin),WA=C.whatsapp||'';
+const durDe=s=>(s&&s.duracion)||DUR;                       // cada servicio puede durar distinto
+const durActual=()=>durDe(SERVICES.find(x=>x.id===st.svc));
+// Horas de inicio posibles según la duración: las fijas para citas normales, cada 30 min para las cortas
+function candidatos(dur){
+  if(!SLOTS.length)return [];
+  if(dur>=DUR)return SLOTS.slice();
+  const abre=Math.min(...SLOTS),cierra=Math.max(...SLOTS)+DUR,out=[];
+  for(let m=abre;m+dur<=cierra;m+=30)out.push(m);
+  return out;
+}
 const st={svc:null,prod:{},day:null,slot:null,enviando:false};
 
 /* ============================ textos de marca ============================ */
@@ -452,8 +467,8 @@ function pintarCatalogo(){
   $('svcList').innerHTML=SERVICES.map(s=>`
    <button class="svc" role="radio" aria-checked="${st.svc===s.id}" data-id="${esc(s.id)}">
     <span class="radio"></span>
-    <span><span class="svc-name">${esc(s.nombre)}${s.etiqueta?`<span class="tag">${esc(s.etiqueta)}</span>`:''}</span><span class="svc-inc">${incluyeHTML(s.incluye)}</span></span>
-    <span class="svc-price display num">${cop(s.precio)}</span>
+    <span><span class="svc-name">${esc(s.nombre)}${s.etiqueta?`<span class="tag">${esc(s.etiqueta)}</span>`:''}</span><span class="svc-inc">${incluyeHTML(s.incluye)} · ${durDe(s)} min</span></span>
+    <span class="svc-price display num">${cop(s.precio)}${hayRango(s)?`<small>hasta ${cop(s.precioMax)}</small>`:''}</span>
    </button>`).join('')||'<p class="hint">Pronto publico mis servicios.</p>';
   $('prodRow').innerHTML=PRODUCTS.map(p=>{const q=st.prod[p.id]||0;return `
    <div class="prod ${q?'on':''}" data-id="${esc(p.id)}">
@@ -463,7 +478,6 @@ function pintarCatalogo(){
     <div class="qty"><button data-d="-1" aria-label="Quitar">−</button><output class="num">${q}</output><button data-d="1" aria-label="Sumar">+</button></div>
    </div>`;}).join('');
   $('extras').hidden=!PRODUCTS.length;
-  $('txtDur').textContent=DUR;
   sync();
 }
 async function cargarCatalogo(){
@@ -485,6 +499,7 @@ $('svcList').addEventListener('click',e=>{
   const b=e.target.closest('.svc');if(!b)return;
   st.svc=b.dataset.id;
   document.querySelectorAll('.svc').forEach(x=>x.setAttribute('aria-checked',x===b));
+  if(st.day){st.slot=null;cargarHoras();}                  // la duración cambió: otras horas posibles
   sync();
 });
 $('prodRow').addEventListener('click',e=>{
@@ -516,20 +531,24 @@ $('days').addEventListener('click',e=>{
 });
 let consulta=0;
 async function cargarHoras(){
-  const n=++consulta,dia=st.day;
+  const n=++consulta,dia=st.day,dur=durActual();
   $('slots').innerHTML='<p class="hint">Buscando mis horas libres…</p>';
-  let libres;
+  let libres,todas;
   if(!API){
-    const lim=Date.now()+120*60000,s=dia.getDate(),ocup=[s%SLOTS.length,(s*3+1)%SLOTS.length];
-    libres=SLOTS.filter((m,i)=>ocup.indexOf(i)===-1&&dia.getTime()+m*60000>lim);
+    const lim=Date.now()+120*60000,s=dia.getDate();
+    todas=candidatos(dur);
+    libres=todas.filter((m,i)=>i!==s%todas.length&&i!==(s*3+1)%todas.length&&dia.getTime()+m*60000>lim);
   }else{
-    try{const d=await pedir(`${API}?accion=horas&fecha=${iso(dia)}`);libres=Array.isArray(d.libres)?d.libres:null;}
-    catch(e){libres=null;}
+    try{
+      const d=await pedir(`${API}?accion=horas&fecha=${iso(dia)}${st.svc?`&servicio=${encodeURIComponent(st.svc)}`:''}`);
+      libres=Array.isArray(d.libres)?d.libres:null;
+      todas=Array.isArray(d.todas)?d.todas:SLOTS;
+    }catch(e){libres=null;}
   }
-  if(n!==consulta)return;                       // el usuario cambió de día mientras cargaba
+  if(n!==consulta)return;                       // el usuario cambió de día o de corte mientras cargaba
   if(libres===null){$('slots').innerHTML='<p class="hint">No pude consultar la agenda. Intenta de nuevo o escríbeme por WhatsApp.</p>';return;}
   $('slots').innerHTML=libres.length
-    ?'<div class="slots">'+SLOTS.map(m=>`<button class="slot" aria-pressed="false" data-m="${m}" ${libres.indexOf(m)===-1?'disabled':''}><b class="num">${hm(m)}</b><small class="num">hasta ${hm(m+DUR)}</small></button>`).join('')+'</div>'
+    ?'<div class="slots">'+todas.map(m=>`<button class="slot" aria-pressed="false" data-m="${m}" ${libres.indexOf(m)===-1?'disabled':''}><b class="num">${hm(m)}</b><small class="num">hasta ${hm(m+dur)}</small></button>`).join('')+'</div>'
     :'<p class="hint">Ese día ya no tengo horas libres, mi hermanito. Prueba otro.</p>';
 }
 $('slots').addEventListener('click',e=>{
@@ -548,7 +567,8 @@ const mailOk=()=>{const v=$('fMail').value.trim();return !v||/^[^\s@]+@[^\s@]+\.
 function totals(){
   const s=SERVICES.find(x=>x.id===st.svc);let t=s?s.precio:0,n=0;
   PRODUCTS.forEach(p=>{const q=st.prod[p.id]||0;t+=p.precio*q;n+=q;});
-  return{s,t,n};
+  const rango=hayRango(s),tMax=rango?t-s.precio+s.precioMax:t;
+  return{s,t,n,rango,tMax};
 }
 function marcar(id){jump('datos');$(id).parentElement.classList.add('err');setTimeout(()=>$(id).focus({preventScroll:true}),450);}
 function nextStep(){
@@ -563,21 +583,24 @@ function nextStep(){
 }
 function jump(id){$(id).scrollIntoView({behavior:'smooth'});}
 function sync(){
-  const{s,t,n}=totals(),nx=nextStep();
+  const{s,t,n,rango,tMax}=totals(),nx=nextStep();
   $('corte').classList.toggle('done',!!s);
   $('extras').classList.toggle('done',n>0);
   $('cuando').classList.toggle('done',!!st.day&&st.slot!=null);
   $('datos').classList.toggle('done',!!$('fName').value.trim()&&telOk()&&!!$('fDir').value.trim()&&mailOk()&&$('fOk').checked);
   const rows=[];
-  if(s)rows.push([s.nombre,s.precio]);
+  if(s)rows.push([s.nombre,precioTxt(s)]);
   PRODUCTS.forEach(p=>{if(st.prod[p.id])rows.push([`${p.nombre} ×${st.prod[p.id]}`,p.precio*st.prod[p.id]]);});
-  $('sumRows').innerHTML=rows.length?rows.map(r=>`<div><span>${esc(r[0])}</span><span class="num">${cop(r[1])}</span></div>`).join(''):'<p class="sum-empty">Aún no has escogido tu corte.</p>';
+  $('sumRows').innerHTML=rows.length?rows.map(r=>`<div><span>${esc(r[0])}</span><span class="num">${typeof r[1]==='number'?cop(r[1]):r[1]}</span></div>`).join(''):'<p class="sum-empty">Aún no has escogido tu corte.</p>';
   $('sumDay').textContent=st.day?fmtDay(st.day):'—';
-  $('sumSlot').textContent=st.slot!=null?`${hm(st.slot)} – ${hm(st.slot+DUR)}`:'—';
+  $('sumSlot').textContent=st.slot!=null?`${hm(st.slot)} – ${hm(st.slot+durDe(s))}`:'—';
   $('sumTotal').textContent=cop(t);
+  $('sumTotalLbl').textContent=rango?'Total desde':'Total';
+  $('sumSub').hidden=!rango;$('sumSub').textContent=rango?`Puede llegar hasta ${cop(tMax)} según el trabajo`:'';
+  $('txtDurP').textContent=s?`Horas libres de mi calendario. Tu cita dura ${durDe(s)} minutos.`:'Horas libres de mi calendario. Escoge primero tu corte.';
   $('bar').classList.toggle('up',!!s);
   $('barSub').textContent=s?(s.nombre+(n?` + ${n} producto${n>1?'s':''}`:'')):'';
-  $('barTotal').textContent=cop(t);
+  $('barTotal').textContent=(rango?'Desde ':'')+cop(t);
   const label=st.enviando?'Agendando…':nx.label;
   [$('ctaDesk'),$('ctaBar')].forEach(b=>{b.textContent=label;b.disabled=st.enviando;});
   $('ctaDesk').classList.toggle('pending',!nx.ready);$('ctaDesk').classList.toggle('btn-accent',!!nx.ready);
@@ -591,7 +614,8 @@ function error(msg){$('errDesk').textContent=msg;$('errDesk').hidden=false;alert
 async function confirmar(){
   if(st.enviando)return;
   $('errDesk').hidden=true;
-  const{s,t}=totals();
+  const{s,t,rango,tMax}=totals();
+  const totalTxt=rango?`desde ${cop(t)} (hasta ${cop(tMax)})`:cop(t);
   const productos=PRODUCTS.filter(p=>st.prod[p.id]).map(p=>({id:p.id,cant:st.prod[p.id]}));
   const texto=PRODUCTS.filter(p=>st.prod[p.id]).map(p=>`${p.nombre} ×${st.prod[p.id]}`).join(', ')||'Nada';
   const cita={fecha:iso(st.day),inicio:st.slot,servicioId:s.id,productos,
@@ -619,12 +643,12 @@ async function confirmar(){
        :res.correo?'Tu cita quedó en mi agenda. Te envié la confirmación a tu correo y un día antes te llega el recordatorio.'
        :'Tu cita quedó en mi agenda. Si quieres, avísame por WhatsApp.')
     :'Así se ve cuando la cita queda agendada.';
-  $('mDetail').innerHTML=[['Corte',esc(s.nombre)],['Cuándo',`${fmtDay(st.day)}<br>${hm(st.slot)} – ${hm(st.slot+DUR)}`],['Dónde',esc(cita.direccion)],['Te llevo',esc(texto)],['Total',`<b style="color:var(--accent)">${cop(t)}</b>`]]
+  $('mDetail').innerHTML=[['Corte',esc(s.nombre)],['Cuándo',`${fmtDay(st.day)}<br>${hm(st.slot)} – ${hm(st.slot+durDe(s))}`],['Dónde',esc(cita.direccion)],['Te llevo',esc(texto)],['Total',`<b style="color:var(--accent)">${totalTxt}</b>`]]
     .map(r=>`<div class="ev"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');
   $('demoNote').hidden=!!API;
   const wa=String(WA).replace(/\D/g,'');
   if(wa.length>=10){
-    const msg=`Hola Yeimer! Agendé ${s.nombre} para el ${fmtDay(st.day)} a las ${hm(st.slot)}.\nDirección: ${cita.direccion}\nProductos: ${texto}\nTotal: ${cop(t)}\nSoy ${cita.nombre}`;
+    const msg=`Hola Yeimer! Agendé ${s.nombre} para el ${fmtDay(st.day)} a las ${hm(st.slot)}.\nDirección: ${cita.direccion}\nProductos: ${texto}\nTotal: ${totalTxt}\nSoy ${cita.nombre}`;
     $('waBtn').href=`https://wa.me/${wa}?text=${encodeURIComponent(msg)}`;$('waBtn').hidden=false;
   }
   $('modal').classList.add('on');
