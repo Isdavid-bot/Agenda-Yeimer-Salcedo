@@ -55,7 +55,9 @@ a{color:inherit;text-decoration:none;}
 
 /* ---------- hero ---------- */
 .hero-media{position:relative;height:44svh;min-height:300px;max-height:460px;overflow:hidden;}
-.hero-media img{width:100%;height:100%;object-fit:cover;object-position:center 26%;}
+.hero-media img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 26%;opacity:0;transition:opacity 1.2s ease;}
+.hero-media img.on{opacity:1;}
+@media (prefers-reduced-motion:reduce){.hero-media img{transition:none;}}
 .hero-media::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,11,10,.6) 0%,rgba(11,11,10,0) 20%,rgba(11,11,10,0) 50%,var(--bg) 96%);}
 .hero-copy{position:relative;z-index:2;margin-top:-72px;padding-bottom:32px;}
 .kicker{display:flex;align-items:center;gap:10px;font-size:.74rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:14px;}
@@ -277,7 +279,7 @@ footer{padding:28px 0 calc(110px + env(safe-area-inset-bottom,0px));}
 <div class="demo-flag" id="demoFlag" hidden>Modo demo · no agenda de verdad</div>
 
 <header class="hero" id="top">
-  <div class="hero-media"><img id="foto" src="fotos/yeimer.jpg" alt="Yeimer Salcedo, barbero en Montería" fetchpriority="high"></div>
+  <div class="hero-media"><img id="foto" class="on" src="fotos/yeimer-1.jpg" alt="Yeimer Salcedo, barbero en Montería" fetchpriority="high"></div>
   <div class="hero-copy">
     <div class="container">
       <div class="kicker" id="txtKicker"></div>
@@ -406,7 +408,34 @@ const st={svc:null,prod:{},day:null,slot:null,enviando:false};
 
 /* ============================ textos de marca ============================ */
 $('txtMarca').textContent=M.nombre;
-$('foto').src=M.foto;
+/* ---- fotos del inicio: una sola, o varias que se funden entre sí ---- */
+(function(){
+  const lista=(Array.isArray(M.fotos)&&M.fotos.length?M.fotos:[M.foto]).map(f=>typeof f==='string'?{src:f}:f);
+  const alt=`${M.nombre}, barbero en ${M.ciudad}`;
+  const primera=$('foto');
+  primera.src=lista[0].src;primera.alt=alt;
+  if(lista[0].pos)primera.style.objectPosition=lista[0].pos;
+  if(lista.length<2)return;
+  const cont=primera.parentElement;
+  const imgs=[primera];
+  lista.slice(1).forEach(f=>{
+    const im=new Image();im.alt=alt;im.decoding='async';
+    if(f.pos)im.style.objectPosition=f.pos;
+    im.src=f.src;cont.appendChild(im);imgs.push(im);
+  });
+  if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;   // quien lo pide, ve solo la primera
+  const SEGUNDOS=Math.max(3,Number(M.fotosSegundos)||5);
+  let i=0,timer=null;
+  const siguiente=()=>{
+    const j=(i+1)%imgs.length;
+    if(!imgs[j].complete||!imgs[j].naturalWidth)return;     // aún cargando: espera al próximo turno
+    imgs[i].classList.remove('on');imgs[j].classList.add('on');i=j;
+  };
+  const arrancar=()=>{if(!timer)timer=setInterval(siguiente,SEGUNDOS*1000);};
+  const parar=()=>{clearInterval(timer);timer=null;};
+  document.addEventListener('visibilitychange',()=>document.hidden?parar():arrancar());
+  arrancar();
+})();
 $('txtKicker').textContent=`${M.nombre} · a domicilio`;
 $('txtTitulo').innerHTML=M.titulo.map((l,i,a)=>i===a.length-1?`<span class="gold">${esc(l)}</span>`:esc(l)).join('<br>');
 $('txtFrase').textContent=M.frase;
