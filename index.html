@@ -423,7 +423,8 @@ $('txtMarca').textContent=M.nombre;
     if(f.pos)im.style.objectPosition=f.pos;
     im.src=f.src;cont.appendChild(im);imgs.push(im);
   });
-  if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;   // quien lo pide, ve solo la primera
+  // Con "reducir movimiento" activado (en Windows pasa si los efectos de animación están apagados),
+  // las fotos igual cambian, pero de golpe, sin fundido: el CSS ya quita la transición.
   const SEGUNDOS=Math.max(3,Number(M.fotosSegundos)||5);
   let i=0,timer=null;
   const siguiente=()=>{
