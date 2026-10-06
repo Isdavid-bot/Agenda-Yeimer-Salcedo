@@ -5,6 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0b0b0a">
 <meta name="robots" content="noindex">
+<link rel="manifest" href="admin.webmanifest">
+<link rel="icon" type="image/png" href="icons/admin-192.png">
+<link rel="apple-touch-icon" href="icons/admin-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Panel Yeimer">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <title>Panel · Yeimer Salcedo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -29,6 +36,18 @@ button{background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:trans
 #pin{width:100%;background:var(--bg-2);border:1px solid var(--line-2);border-radius:14px;padding:16px;text-align:center;font-size:1.6rem;letter-spacing:.3em;color:var(--fg);margin-bottom:14px;}
 #pin:focus{outline:none;border-color:var(--accent);}
 .err{color:var(--bad);font-size:.84rem;margin-bottom:10px;min-height:1.2em;}
+.remember{display:flex;align-items:center;justify-content:center;gap:10px;font-size:.84rem;color:var(--fg-2);margin:0 0 14px;cursor:pointer;}
+.remember input{width:18px;height:18px;accent-color:var(--accent);}
+#loginMsg{display:none;color:var(--fg-2);font-size:.9rem;margin-top:18px;}
+#login.abriendo #pin,#login.abriendo .remember,#login.abriendo #loginBtn,#login.abriendo #loginSub,#login.abriendo .err{display:none;}
+#login.abriendo #loginMsg{display:block;}
+#login.sinred #pin,#login.sinred .remember{display:none;}
+.app-card{background:var(--bg-2);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:24px;}
+.app-card b{display:block;font-size:.95rem;margin-bottom:4px;}
+.app-card p{font-size:.84rem;color:var(--fg-2);line-height:1.5;}
+.app-card .btn{margin-top:12px;width:100%;}
+.btn.line{background:transparent;border:1px solid var(--line-2);color:var(--fg);font-weight:600;}
+.sin-sesion{margin:0 0 22px;}
 
 /* ---- shell ---- */
 #app{display:none;}
@@ -141,9 +160,11 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(11,11
   <div class="box">
     <div class="display" style="font-size:.72rem;color:var(--accent);letter-spacing:.16em;margin-bottom:10px">Panel privado</div>
     <h1 class="display">Yeimer Salcedo</h1>
-    <p>Ingresa tu PIN para entrar</p>
+    <p id="loginSub">Ingresa tu PIN para entrar</p>
     <input id="pin" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••" autocomplete="off">
+    <label class="remember"><input type="checkbox" id="recordar" checked><span>Mantener sesión en este celular</span></label>
     <p class="err" id="loginErr"></p>
+    <p id="loginMsg">Abriendo tu panel…</p>
     <button class="btn gold" id="loginBtn" style="width:100%">Entrar</button>
   </div>
 </div>
@@ -201,6 +222,8 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(11,11
       <h2 class="h display">Ajustes</h2>
       <p class="sub">Tu horario, contacto y zona de trabajo.</p>
 
+      <div class="app-card" id="appCard"></div>
+
       <h3 class="grp">Días que no trabajas</h3>
       <div class="dow" id="dow"></div>
 
@@ -221,6 +244,8 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(11,11
 
       <h3 class="grp">Seguridad</h3>
       <div class="field"><label>Cambiar PIN del panel</label><input id="nuevoPin" inputmode="numeric" placeholder="Nuevo PIN (mínimo 4 dígitos)"><p class="hint2">Solo tú deberías conocer este PIN. Compártelo únicamente con quien maneje la página.</p></div>
+
+      <div class="sin-sesion"><button class="btn line" id="cerrarSesion" style="width:100%">Cerrar sesión en este celular</button></div>
 
       <div class="save-bar"><button class="btn gold" id="guardarAjustes">Guardar ajustes</button></div>
     </section>
@@ -246,8 +271,18 @@ const API=(DATOS.agenda.apiUrl||'').trim();
 const cop=n=>'$'+Number(n||0).toLocaleString('es-CO');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const DOW=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-let PIN=sessionStorage.getItem('yeimer_pin')||'';
-let panel=null;
+/* La sesión se recuerda en el celular (para que, como app, no pida el PIN cada vez que se abre).
+   "Cerrar sesión" en Ajustes la borra. Si no se marca "Mantener sesión", solo dura mientras la pestaña esté abierta. */
+const CLAVE_PIN='yeimer_pin';
+const leerPin=()=>{try{return localStorage.getItem(CLAVE_PIN)||sessionStorage.getItem(CLAVE_PIN)||'';}catch(e){return '';}};
+const pinRecordado=()=>{try{return !!localStorage.getItem(CLAVE_PIN);}catch(e){return false;}};
+const guardarPin=(pin,recordar)=>{try{
+  if(recordar){localStorage.setItem(CLAVE_PIN,pin);sessionStorage.removeItem(CLAVE_PIN);}
+  else{sessionStorage.setItem(CLAVE_PIN,pin);localStorage.removeItem(CLAVE_PIN);}
+}catch(e){}};
+const borrarPin=()=>{try{localStorage.removeItem(CLAVE_PIN);sessionStorage.removeItem(CLAVE_PIN);}catch(e){}};
+let PIN=leerPin();
+let panel=null,panelCargadoEn=0;
 
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('show'),2600);}
 async function llamar(body){
@@ -257,22 +292,43 @@ async function llamar(body){
 }
 
 /* ============================ login ============================ */
+function mostrarApp(d){
+  panel=d;panelCargadoEn=Date.now();
+  $('login').style.display='none';$('app').classList.add('on');$('tabs').hidden=false;
+  pintarTodo();
+}
 async function entrar(){
-  const pin=$('pin').value.trim();
+  const escrito=$('pin').value.trim();
+  const usaGuardado=!escrito&&!!PIN;              // campo vacío + PIN recordado = reintentar con ese
+  const pin=escrito||PIN;
   if(!pin){$('loginErr').textContent='Escribe tu PIN.';return;}
-  $('loginBtn').disabled=true;$('loginBtn').textContent='Entrando…';
+  $('loginBtn').disabled=true;$('loginBtn').textContent='Entrando…';$('loginErr').textContent='';
   try{
     if(!API)throw {msg:'Falta conectar la agenda: pega la URL en datos.js (agenda.apiUrl).'};
     const r=await fetch(`${API}?accion=panel&pin=${encodeURIComponent(pin)}`);
     const d=await r.json();
-    if(d.error==='pin'){$('loginErr').textContent='PIN incorrecto.';return;}
-    if(d.error==='bloqueado'){$('loginErr').textContent='Demasiados intentos. Espera unos 15 minutos e intenta de nuevo.';return;}
+    if(d.error==='pin'){
+      if(usaGuardado){borrarPin();PIN='';}
+      $('login').classList.remove('sinred');
+      $('loginErr').textContent=usaGuardado?'Tu PIN cambió. Ingresa el nuevo.':'PIN incorrecto.';
+      return;
+    }
+    if(d.error==='bloqueado'){
+      if(usaGuardado)$('login').classList.add('sinred');
+      $('loginErr').textContent='Demasiados intentos. Espera unos 15 minutos e intenta de nuevo.';
+      return;
+    }
     if(d.error)throw {msg:'No se pudo entrar. Intenta de nuevo.'};
-    PIN=pin;sessionStorage.setItem('yeimer_pin',pin);panel=d;
-    $('login').style.display='none';$('app').classList.add('on');$('tabs').hidden=false;
-    pintarTodo();
-  }catch(e){$('loginErr').textContent=(e&&e.msg)||'No se pudo conectar. Revisa tu internet.';}
-  finally{$('loginBtn').disabled=false;$('loginBtn').textContent='Entrar';}
+    PIN=pin;guardarPin(pin,usaGuardado?pinRecordado():$('recordar').checked);
+    mostrarApp(d);
+  }catch(e){
+    $('loginErr').textContent=(e&&e.msg)||'Sin conexión. Revisa tu internet e intenta de nuevo.';
+    if(usaGuardado)$('login').classList.add('sinred');       // con PIN recordado: solo se ofrece "Reintentar"
+  }finally{
+    $('login').classList.remove('abriendo');
+    $('loginBtn').disabled=false;
+    $('loginBtn').textContent=$('login').classList.contains('sinred')?'Reintentar':'Entrar';
+  }
 }
 $('loginBtn').addEventListener('click',entrar);
 $('pin').addEventListener('keydown',e=>{if(e.key==='Enter')entrar();});
@@ -283,20 +339,21 @@ async function recargar(){
     const r=await fetch(`${API}?accion=panel&pin=${encodeURIComponent(PIN)}`);
     const d=await r.json();
     if(d.error==='bloqueado'){toast('Demasiados intentos recientes. Espera unos minutos.');return;}
-    if(d.error==='pin'){sessionStorage.removeItem('yeimer_pin');location.reload();return;}
-    panel=d;pintarTodo();
-  }catch(e){toast('No se pudo actualizar.');}
+    if(d.error==='pin'){borrarPin();location.reload();return;}
+    panel=d;panelCargadoEn=Date.now();pintarTodo();
+  }catch(e){toast('Sin conexión. No se pudo actualizar.');}
   finally{$('refreshBtn').classList.remove('spin');}
 }
 $('refreshBtn').addEventListener('click',recargar);
-if(PIN){
-  // reintenta sesión guardada en este mismo dispositivo/pestaña
-  (async()=>{try{
-    const r=await fetch(`${API}?accion=panel&pin=${encodeURIComponent(PIN)}`);
-    const d=await r.json();
-    if(!d.error){panel=d;$('login').style.display='none';$('app').classList.add('on');$('tabs').hidden=false;pintarTodo();}
-  }catch(e){}})();
-}
+// Como app: al volver a abrirla (o tras recuperar internet) trae los datos frescos, sin tocar nada
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&panel&&Date.now()-panelCargadoEn>60000)recargar();});
+addEventListener('online',()=>{if(panel)recargar();});
+$('cerrarSesion').addEventListener('click',()=>{
+  if(!confirm('¿Cerrar sesión en este celular? La próxima vez tendrás que escribir el PIN.'))return;
+  borrarPin();PIN='';location.reload();
+});
+// Si hay un PIN recordado en este celular, abre directo (sin mostrar el formulario)
+if(PIN){$('login').classList.add('abriendo');entrar();}
 
 /* ============================ tabs ============================ */
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
@@ -414,6 +471,7 @@ $('guardarCatalogo').addEventListener('click',async()=>{
 /* ============================ ajustes ============================ */
 let cerrados=[];
 function pintarAjustes(){
+  pintarInstalar();
   const a=panel.ajustes;
   cerrados=(a.dias_cerrados||'').split(',').map(s=>Number(s.trim())).filter(n=>!isNaN(n));
   $('dow').innerHTML=DOW.map((d,i)=>`<button data-d="${i}" class="${cerrados.includes(i)?'off':''}">${d}</button>`).join('');
@@ -446,6 +504,28 @@ $('slotEdit').addEventListener('click',e=>{
   const horas=JSON.parse($('slotEdit').dataset.horas||'[]').filter(h=>h!==chip.dataset.h);
   pintarHoras(horas);
 });
+/* ============================ instalar como app ============================ */
+let promptInstalar=null;
+const esApp=()=>(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true;
+const esIphone=()=>/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+function pintarInstalar(){
+  const c=$('appCard');if(!c)return;
+  if(esApp()){c.innerHTML='<b>✓ Ya la usas como app</b><p>Se abre desde el ícono, a pantalla completa y sin pedirte el PIN cada vez.</p>';return;}
+  if(promptInstalar){
+    c.innerHTML='<b>Instalar como app</b><p>Pon el Panel en la pantalla de inicio de tu celular, con su ícono, a pantalla completa.</p><button class="btn gold" id="btnInstalar">Instalar en este celular</button>';
+    $('btnInstalar').addEventListener('click',async()=>{promptInstalar.prompt();try{await promptInstalar.userChoice;}catch(e){}promptInstalar=null;pintarInstalar();});
+    return;
+  }
+  c.innerHTML=esIphone()
+    ?'<b>Instalar como app</b><p>En el iPhone: abre esta página en <b style="display:inline">Safari</b>, toca el botón <b style="display:inline">Compartir</b> (el cuadrito con la flecha hacia arriba) y elige <b style="display:inline">«Agregar a pantalla de inicio»</b>.</p>'
+    :'<b>Instalar como app</b><p>En Android (Chrome): toca los tres puntos <b style="display:inline">⋮</b> arriba a la derecha y elige <b style="display:inline">«Instalar app»</b> o <b style="display:inline">«Agregar a pantalla de inicio»</b>.</p>';
+}
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptInstalar=e;if(panel)pintarInstalar();});
+addEventListener('appinstalled',()=>{promptInstalar=null;if(panel)pintarInstalar();});
+if('serviceWorker' in navigator){
+  addEventListener('load',()=>{navigator.serviceWorker.register('admin-sw.js',{scope:'admin.html'}).catch(()=>{});});
+}
+
 $('guardarAjustes').addEventListener('click',async()=>{
   const btn=$('guardarAjustes');btn.disabled=true;btn.textContent='Guardando…';
   try{
@@ -459,7 +539,7 @@ $('guardarAjustes').addEventListener('click',async()=>{
     const r=await llamar({accion:'guardar_ajustes',pin:PIN,valores});
     let ok=r.ok;
     const np=$('nuevoPin').value.trim();
-    if(ok&&np){const r2=await llamar({accion:'guardar_pin',pin:PIN,nuevoPin:np});if(r2.ok){PIN=np;sessionStorage.setItem('yeimer_pin',PIN);}else ok=false;}
+    if(ok&&np){const r2=await llamar({accion:'guardar_pin',pin:PIN,nuevoPin:np});if(r2.ok){const recordado=pinRecordado();PIN=np;guardarPin(PIN,recordado);}else ok=false;}
     if(ok){toast('Ajustes guardados.');recargar();}else toast('Algo falló guardando.');
   }catch(e){toast('No se pudo guardar. Revisa tu internet.');}
   finally{btn.disabled=false;btn.textContent='Guardar ajustes';}

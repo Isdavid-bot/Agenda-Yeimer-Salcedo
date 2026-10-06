@@ -40,6 +40,26 @@ Es una página aparte, protegida con un **PIN de 4 a 8 dígitos**, pensada para 
 
 El PIN que trae por defecto es `1234` — es lo primero que hay que cambiar, en *Ajustes → Seguridad*. Como es solo un PIN (no un usuario con contraseña de verdad), no lo compartas fuera del círculo de confianza; para una barbería es un nivel de protección razonable, no bancario.
 
+### Instalar el Panel como app en el celular
+
+El Panel se puede poner en la pantalla de inicio del celular de Yeimer, con su ícono (el monograma dorado "YS"), y se abre a pantalla completa, sin barra del navegador.
+
+**Archivos que lo hacen posible** (van en la raíz del proyecto, junto a `admin.html`): `admin.webmanifest`, `admin-sw.js` y la carpeta `icons/`. Si falta alguno, el Panel sigue funcionando en el navegador, pero no se deja instalar.
+
+**Cómo instalarla** (desde el celular de Yeimer, abriendo `tu-link.vercel.app/admin.html`):
+- **Android (Chrome):** tocar los tres puntos ⋮ → "Instalar app" (o "Agregar a pantalla de inicio"). En *Ajustes* del Panel también aparece un botón "Instalar en este celular".
+- **iPhone (Safari):** tocar el botón Compartir (el cuadrito con la flecha) → "Agregar a pantalla de inicio". Tiene que ser desde Safari.
+
+La primera vez, dentro de la app, escribe el PIN con la casilla **"Mantener sesión en este celular"** marcada. Desde ahí la app abre directo, sin pedir el PIN.
+
+**Seguridad:** como el PIN queda recordado en el celular, quien tenga el celular desbloqueado puede abrir el Panel. Por eso el celular debe tener bloqueo de pantalla. Si Yeimer pierde el celular o lo presta, desde otro dispositivo cambia el PIN (Ajustes → Seguridad): el celular viejo deja de entrar. Para salir en un celular: Ajustes → "Cerrar sesión en este celular".
+
+**Qué hace la app, y qué no:**
+- Al volver a abrirla (si pasó más de un minuto), trae sola los datos frescos.
+- Si no hay internet, abre igual y avisa "Sin conexión", pero no muestra la agenda: los datos siempre vienen de internet. Nada de la agenda ni de los clientes se guarda en el celular.
+- **No manda notificaciones.** Para enterarse de una cita nueva, Yeimer ya recibe el correo "Nueva cita"; con las notificaciones de la app de Gmail activadas, le suena el celular.
+- Cuando se publique una versión nueva del Panel, la app la toma sola, sin reinstalar.
+
 **Un límite real, dicho sin rodeos:** el panel no tiene "arrastrar y mover" una cita a otra hora. Para reprogramar, se cancela la cita actual y se crea una nueva en el horario correcto. Es más clics, pero evita el riesgo de mover algo sin querer.
 
 ---
