@@ -677,6 +677,10 @@ async function confirmar(){
     const e=res&&res.error;
     if(e==='ocupado'){error('Justo acaban de tomar esa hora, mi hermanito. Escoge otra.');st.slot=null;sync();cargarHoras();jump('cuando');}
     else if(e==='politica'){error('Falta aceptar la política de cancelación.');jump('datos');$('polConsent').classList.add('err');}
+    else if(e==='telefono'){error('Revisa tu número: debe ser un celular colombiano de 10 dígitos (ej. 3001234567).');jump('datos');$('fTel').focus();}
+    else if(e==='enlaces'){error('Por seguridad no se aceptan enlaces ni páginas web en los datos. Quítalos e intenta de nuevo.');jump('datos');}
+    else if(e==='limite_cliente')error('Ya tienes citas pendientes con este teléfono o correo. Para cambiar o cancelar una, usa el enlace de tu confirmación, o escríbeme por WhatsApp.');
+    else if(e==='limite_sistema')error('Hay muchas solicitudes en este momento. Escríbeme por WhatsApp y te agendo yo directamente, mi hermanito.');
     else if(e==='red')error('No hubo conexión con la agenda. Revisa tu internet e intenta de nuevo, o escríbeme por WhatsApp.');
     else error('No pude agendar la cita. Intenta de nuevo o escríbeme por WhatsApp.');
     return;

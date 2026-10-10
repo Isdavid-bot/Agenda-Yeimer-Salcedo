@@ -164,15 +164,25 @@ Meta cobra por cada mensaje de este tipo (valores bajos, se consultan en su pág
 
 ---
 
+## Protección contra abuso del formulario
+El formulario es público, así que el sistema se defiende solo (límites en `CONFIG.LIMITE` de `Codigo.gs`):
+- Máximo **2 citas pendientes** a la vez por teléfono o por correo, y 3 reservas en 24 h (cuentan las canceladas).
+- Máximo **12 reservas por hora** y **40 por día** en total: si alguien intenta llenar la agenda con citas falsas, se corta solo y el cliente ve "escríbeme por WhatsApp".
+- Solo celulares colombianos válidos; no se aceptan enlaces ni dominios en nombre, dirección o nota (nadie puede usar el Gmail de Yeimer para mandar invitaciones con links).
+- Máximo 30 invitaciones de Calendar por día; pasado eso la cita se crea igual, pero sin invitar.
+- Tope de 30 intentos por minuto en todo el sitio y trampa anti-bots (campo oculto).
+- El Panel muestra un aviso rojo mientras el PIN tenga menos de 6 dígitos (el PIN `1234` queda marcado como débil). Tras 8 intentos fallidos se bloquea 15 minutos.
+- Si un cliente real queda bloqueado por estos límites, Yeimer puede agendarlo directo en su Google Calendar.
+
 ## Límites a tener en cuenta
 - Gmail gratuito permite ~100 correos al día desde Apps Script. Sobra para una agenda de barbero.
-- Anticipación mínima para reservar: 2 horas (`AVISO_MIN`).
+- Anticipación mínima para reservar: se cambia en el Panel → Ajustes (recomendado 240 min, igual al plazo de cancelación).
 - Se puede reservar hasta 14 días adelante (`diasAdelante` en `datos.js`).
 
 ## Lista antes de lanzar
 - [ ] Parte 1 completa
 - [ ] URL pegada en `datos.js` y Facebook real
-- [ ] Entrar al Panel (`admin.html`) con el PIN `1234` y **cambiarlo de una vez**
+- [ ] Entrar al Panel (`admin.html`) con el PIN `1234` y **cambiarlo de una vez** por uno de 6 dígitos o más
 - [ ] En el Panel → Ajustes: WhatsApp real, correo de avisos, horario real, días libres reales
 - [ ] En el Panel → Carta: precios y productos reales de Yeimer
 - [ ] 2 o 3 reservas de prueba → revisar Calendar, pestaña Citas y correos → cancelarlas desde el Panel

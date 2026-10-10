@@ -215,6 +215,7 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(11,11
   <main class="wrap">
     <!-- HOY -->
     <section class="view on" id="v-hoy">
+      <button class="banner" id="bannerPin" hidden></button>
       <button class="banner" id="bannerCobros" hidden></button>
       <h2 class="h display">Hoy</h2>
       <p class="sub" id="fechaHoy"></p>
@@ -296,7 +297,7 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(11,11
       <div class="field"><label>Nota bajo los servicios, en la página</label><textarea id="ajNota"></textarea></div>
 
       <h3 class="grp">Seguridad</h3>
-      <div class="field"><label>Cambiar PIN del panel</label><input id="nuevoPin" inputmode="numeric" placeholder="Nuevo PIN (mínimo 4 dígitos)"><p class="hint2">Solo tú deberías conocer este PIN. Compártelo únicamente con quien maneje la página.</p></div>
+      <div class="field"><label>Cambiar PIN del panel</label><input id="nuevoPin" inputmode="numeric" placeholder="Nuevo PIN (mínimo 6 dígitos)"><p class="hint2">Solo tú deberías conocer este PIN. Compártelo únicamente con quien maneje la página.</p></div>
 
       <div class="sin-sesion"><button class="btn line" id="cerrarSesion" style="width:100%">Cerrar sesión en este celular</button></div>
 
@@ -567,10 +568,13 @@ function pintarCobros(){
   $('histCobros').hidden=!co.historial.length;
   $('listaHistorial').innerHTML=co.historial.map(c=>tarjetaCobro(c,false)).join('');
   const b=$('badgeCobros');b.hidden=!co.cantidad;b.textContent=co.cantidad;
+  const bp=$('bannerPin'),debil=!!(panel&&panel.seguridad&&panel.seguridad.pinDebil);bp.hidden=!debil;
+  bp.innerHTML=debil?'<span>Tu PIN es muy corto o fácil de adivinar. Cámbialo por uno de 6 dígitos o más.</span><span>Cambiar</span>':'';
   const bn=$('bannerCobros');bn.hidden=!co.cantidad;
   bn.innerHTML=co.cantidad?`<span>${co.cantidad} cobro${co.cantidad>1?'s':''} pendiente${co.cantidad>1?'s':''} · ${cop(co.total)}</span><span>Ver</span>`:'';
 }
 $('bannerCobros').addEventListener('click',()=>irATab('cobros'));
+$('bannerPin').addEventListener('click',()=>{irATab('ajustes');setTimeout(()=>{const i=$('nuevoPin');i.scrollIntoView({block:'center'});i.focus();},120);});
 document.body.addEventListener('click',async e=>{
   const b=e.target.closest('[data-cobro]');if(!b)return;
   b.disabled=true;
@@ -720,7 +724,7 @@ $('guardarAjustes').addEventListener('click',async()=>{
     const r=await llamar({accion:'guardar_ajustes',pin:PIN,valores});
     let ok=r.ok;
     const np=$('nuevoPin').value.trim();
-    if(ok&&np){const r2=await llamar({accion:'guardar_pin',pin:PIN,nuevoPin:np});if(r2.ok){const recordado=pinRecordado();PIN=np;guardarPin(PIN,recordado);}else ok=false;}
+    if(ok&&np){const r2=await llamar({accion:'guardar_pin',pin:PIN,nuevoPin:np});if(r2.ok){const recordado=pinRecordado();PIN=np;guardarPin(PIN,recordado);}else{ok=false;toast(r2.error||'No se pudo cambiar el PIN.');recargar();return;}}
     if(ok){toast('Ajustes guardados.');recargar();}else toast('Algo falló guardando.');
   }catch(e){toast('No se pudo guardar. Revisa tu internet.');}
   finally{btn.disabled=false;btn.textContent='Guardar ajustes';}
