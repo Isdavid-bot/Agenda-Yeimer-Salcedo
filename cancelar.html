@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0a">
+<meta name="robots" content="noindex">
+<title>Cancelar o cambiar mi cita · Yeimer Salcedo</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2222%22 fill=%22%230b0b0a%22/><text x=%2250%22 y=%2268%22 font-size=%2248%22 text-anchor=%22middle%22 fill=%22%23c9a45c%22 font-family=%22Arial Black,Arial%22 font-weight=%22900%22>YS</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..100,400..800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0b0a;--bg-2:#121211;--bg-3:#1a1a18;--fg:#f2eee6;--fg-2:#a6a095;--fg-3:#6d6860;--line:rgba(242,238,230,.09);--line-2:rgba(242,238,230,.2);--accent:#c9a45c;--accent-2:#e2c285;--on-accent:#0b0b0a;--bad:#e0a090;--ok:#6fae7a;color-scheme:dark;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{overflow-x:hidden;width:100%;-webkit-text-size-adjust:100%;}
+body{background:var(--bg);color:var(--fg);font-family:'Archivo',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden;width:100%;min-height:100svh;padding:calc(20px + env(safe-area-inset-top,0px)) 20px calc(40px + env(safe-area-inset-bottom,0px));}
+[hidden]{display:none!important;}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+a{color:inherit;text-decoration:none;}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px;}
+.display{font-stretch:62%;font-variation-settings:'wdth' 62;font-weight:800;text-transform:uppercase;line-height:.92;letter-spacing:-.005em;}
+.wrap{max-width:480px;margin:0 auto;}
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:34px;}
+.top a{font-size:1.15rem;}
+.eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
+h1{font-size:clamp(2.4rem,11vw,3.2rem);margin-bottom:8px;}
+.sub{color:var(--fg-2);font-size:.95rem;margin-bottom:22px;}
+.card{background:var(--bg-2);border:1px solid var(--line);border-radius:18px;padding:6px 18px;margin-bottom:18px;}
+.row{display:grid;grid-template-columns:84px 1fr;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);font-size:.95rem;}
+.row:last-child{border-bottom:0;}
+.row span:first-child{color:var(--fg-3);font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600;padding-top:3px;}
+.nota{border-radius:14px;padding:14px 16px;font-size:.88rem;line-height:1.55;margin-bottom:18px;border:1px solid var(--line-2);color:var(--fg-2);}
+.nota b{color:var(--fg);}
+.nota.ok{border-color:rgba(111,174,122,.45);background:rgba(111,174,122,.07);}
+.nota.warn{border-color:rgba(224,160,144,.5);background:rgba(224,160,144,.07);}
+.btns{display:grid;gap:10px;}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;height:52px;border-radius:999px;font-weight:700;font-size:.95rem;padding:0 22px;text-align:center;transition:background .2s,border-color .2s;}
+.btn.gold{background:var(--accent);color:var(--on-accent);}
+.btn.gold:hover{background:var(--accent-2);}
+.btn.line{border:1px solid var(--line-2);color:var(--fg);font-weight:600;}
+.btn.line:hover{border-color:var(--fg);}
+.btn.danger{border:1px solid rgba(224,160,144,.55);color:var(--bad);font-weight:600;}
+.btn.danger:hover{background:rgba(224,160,144,.1);}
+.btn.red{background:#b9654f;color:#fff;}
+.btn:disabled{opacity:.5;cursor:not-allowed;}
+.confirma{border:1px solid rgba(224,160,144,.5);border-radius:16px;padding:18px;margin-bottom:6px;}
+.confirma p{margin-bottom:14px;font-size:.95rem;}
+.err{color:var(--bad);font-size:.86rem;margin-top:12px;text-align:center;}
+.centro{text-align:center;padding:40px 0;color:var(--fg-2);}
+.punto{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--accent);margin-right:10px;animation:p 1s ease-in-out infinite alternate;}
+@keyframes p{from{opacity:.25}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.punto{animation:none;}}
+.pie{margin-top:34px;text-align:center;font-size:.78rem;color:var(--fg-3);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><a class="display" href="index.html" id="marca">Yeimer Salcedo</a></div>
+
+  <section id="cargando" class="centro"><span class="punto"></span>Buscando tu cita…</section>
+
+  <section id="invalido" hidden>
+    <div class="eyebrow">Enlace no válido</div>
+    <h1 class="display">No encontré tu cita</h1>
+    <p class="sub">Este enlace no es válido o está incompleto. Usa el botón del correo o de la invitación que recibiste al agendar.</p>
+    <div class="btns"><a class="btn gold" href="index.html">Ir a la página</a></div>
+  </section>
+
+  <section id="sinred" hidden>
+    <div class="eyebrow">Sin conexión</div>
+    <h1 class="display">No pude conectar</h1>
+    <p class="sub">Revisa tu internet e intenta de nuevo.</p>
+    <div class="btns"><button class="btn gold" id="reintentar">Reintentar</button></div>
+  </section>
+
+  <section id="cita" hidden>
+    <div class="eyebrow" id="eyebrow">Tu cita</div>
+    <h1 class="display" id="titulo"></h1>
+    <p class="sub" id="subtitulo"></p>
+    <div class="card" id="datos"></div>
+    <div class="nota" id="nota" hidden></div>
+    <div class="btns" id="acciones"></div>
+    <div class="confirma" id="confirma" hidden>
+      <p id="confirmaTxt"></p>
+      <div class="btns">
+        <button class="btn red" id="siCancelar">Sí, cancelar mi cita</button>
+        <button class="btn line" id="noCancelar">No, volver</button>
+      </div>
+    </div>
+    <p class="err" id="error" hidden></p>
+  </section>
+
+  <p class="pie">Yeimer Salcedo · El mejor barbero de Montería</p>
+</div>
+
+<script src="datos.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cop=n=>'$'+Number(n||0).toLocaleString('es-CO');
+const API=(DATOS.agenda.apiUrl||'').trim();
+const TOKEN=new URLSearchParams(location.search).get('c')||'';
+$('marca').textContent=DATOS.marca.nombre;
+let D=null;
+
+function horasTxt(h){
+  const min=Math.round(Math.abs(h)*60),hh=Math.floor(min/60),mm=min%60;
+  const t=hh&&mm?`${hh} h ${mm} min`:hh?`${hh} h`:`${mm} min`;
+  return t;
+}
+async function pedir(url,opts={},ms=20000){
+  const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),ms);
+  try{const r=await fetch(url,{...opts,signal:ctl.signal,redirect:'follow'});return await r.json();}
+  finally{clearTimeout(tm);}
+}
+function mostrar(id){['cargando','invalido','sinred','cita'].forEach(s=>$(s).hidden=s!==id);}
+function waLink(texto){
+  const n=String((D&&D.whatsapp)||'').replace(/\D/g,'');
+  return n.length>=10?`https://wa.me/${n}?text=${encodeURIComponent(texto)}`:'';
+}
+function boton(cls,txt,{href,id}={}){
+  return href?`<a class="btn ${cls}" href="${esc(href)}" target="_blank" rel="noopener">${esc(txt)}</a>`
+             :`<button class="btn ${cls}" ${id?`id="${id}"`:''}>${esc(txt)}</button>`;
+}
+function detalle(d){
+  $('datos').innerHTML=`<div class="row"><span>Servicio</span><span>${esc(d.servicio)}</span></div><div class="row"><span>Cuándo</span><span>${esc(d.cuando)}</span></div>`;
+}
+function nota(clase,html){const n=$('nota');n.className='nota '+clase;n.innerHTML=html;n.hidden=false;}
+
+function pintar(d){
+  D=d;mostrar('cita');detalle(d);
+  $('nota').hidden=true;$('confirma').hidden=true;$('error').hidden=true;$('acciones').innerHTML='';
+  const nuevaCita=boton('line','Agendar una nueva cita',{href:'index.html'}).replace(' target="_blank" rel="noopener"','');
+  if(d.estado==='Cancelada'){
+    $('eyebrow').textContent='Cita cancelada';$('titulo').textContent='Ya está cancelada';
+    $('subtitulo').textContent=`${d.nombre}, esta cita ya fue cancelada.`;
+    if(d.tardia&&d.cargoCobrado>0)nota('warn',`Se canceló con menos de ${d.plazoH} horas de anticipación, así que aplica el cargo de <b>${cop(d.cargoCobrado)}</b> de la política que aceptaste al agendar. Yeimer te escribirá para ponerse de acuerdo.`);
+    $('acciones').innerHTML=nuevaCita;return;
+  }
+  if(d.estado!=='Agendada'){
+    $('eyebrow').textContent='Tu cita';$('titulo').textContent='Ya no se puede cambiar';
+    $('subtitulo').textContent='Esta cita ya no se puede modificar desde aquí. Si tienes dudas, escríbele a Yeimer.';
+    const w=waLink(`Hola Yeimer, soy ${d.nombre}. Tengo una duda sobre mi cita de ${d.servicio} del ${d.cuando}.`);
+    $('acciones').innerHTML=(w?boton('gold','Escribirle a Yeimer',{href:w}):'')+nuevaCita;return;
+  }
+  if(d.pasada){
+    $('eyebrow').textContent='Tu cita';$('titulo').textContent='Esta cita ya pasó';
+    $('subtitulo').textContent='Ya no se puede cancelar. Si quieres otra, puedes agendarla de nuevo.';
+    $('acciones').innerHTML=nuevaCita;return;
+  }
+  $('eyebrow').textContent='Tu cita';$('titulo').textContent=`Hola, ${d.nombre}`;
+  $('subtitulo').textContent=`Faltan ${horasTxt(d.horasAntes)} para tu cita.`;
+  const cambiar=waLink(`Hola Yeimer, soy ${d.nombre}. Quiero cambiar la hora de mi cita de ${d.servicio} del ${d.cuando}.`);
+  const hablar=waLink(`Hola Yeimer, soy ${d.nombre}. Tengo mi cita de ${d.servicio} del ${d.cuando} y necesito cancelarla o cambiarla. ¿Podemos hablar?`);
+  if(d.cargo>0&&d.tardiaAhora){
+    nota('warn',`Faltan menos de <b>${d.plazoH} horas</b>. Si cancelas ahora, aplica el cargo de <b>${cop(d.cargo)}</b> que aceptaste al agendar, por el desplazamiento y el tiempo reservado. Si fue una emergencia, escríbele a Yeimer <b>antes</b> de cancelar y lo conversan.`);
+    $('acciones').innerHTML=(hablar?boton('gold','Escribirle a Yeimer',{href:hablar}):'')+boton('danger','Cancelar de todas formas',{id:'btnCancelar'});
+  }else{
+    if(d.cargo>0)nota('ok',`Puedes cancelar <b>sin costo</b> hasta el <b>${esc(d.limite)}</b>. Después de esa hora, cancelar o no estar en la dirección tiene un cargo de ${cop(d.cargo)}.`);
+    $('acciones').innerHTML=boton('danger','Cancelar mi cita',{id:'btnCancelar'})+(cambiar?boton('line','Cambiar la hora (por WhatsApp)',{href:cambiar}):'');
+  }
+  const b=$('btnCancelar');
+  if(b)b.addEventListener('click',()=>{
+    $('confirmaTxt').textContent=`¿Seguro que quieres cancelar tu cita de ${d.servicio} del ${d.cuando}?`+(d.cargo>0&&d.tardiaAhora?` Se aplicará el cargo de ${cop(d.cargo)}.`:'');
+    $('acciones').hidden=true;$('confirma').hidden=false;$('error').hidden=true;
+  });
+}
+
+async function cancelar(){
+  const si=$('siCancelar');si.disabled=true;si.textContent='Cancelando…';$('noCancelar').disabled=true;$('error').hidden=true;
+  try{
+    const r=await pedir(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({accion:'cancelar_cliente',c:TOKEN})},25000);
+    if(r.whatsapp&&D)D.whatsapp=r.whatsapp;
+    $('confirma').hidden=true;$('acciones').hidden=false;$('nota').hidden=true;
+    const nueva=boton('line','Agendar una nueva cita',{href:'index.html'}).replace(' target="_blank" rel="noopener"','');
+    if(r.ok&&r.ya){$('titulo').textContent='Ya estaba cancelada';$('subtitulo').textContent='Esta cita ya había sido cancelada.';$('acciones').innerHTML=nueva;return;}
+    if(r.ok&&!r.tardia){
+      $('eyebrow').textContent='Listo';$('titulo').textContent='Cita cancelada';
+      $('subtitulo').textContent='Tu cita quedó cancelada sin costo. Gracias por avisar, mi hermanito.';
+      $('acciones').innerHTML=nueva;return;
+    }
+    if(r.ok&&r.tardia){
+      $('eyebrow').textContent='Cita cancelada';$('titulo').textContent='Quedó cancelada';
+      $('subtitulo').textContent='';
+      nota('warn',`Como fue con menos de <b>${r.plazoH} horas</b> de anticipación, aplica el cargo de <b>${cop(r.cargo)}</b> de la política que aceptaste al agendar. Yeimer te va a escribir para ponerse de acuerdo. Si prefieres, escríbele tú.`);
+      const w=waLink(`Hola Yeimer, soy ${D.nombre}. Cancelé mi cita de ${D.servicio} del ${D.cuando}. Sé que fue con poco tiempo, ¿cómo hacemos?`);
+      $('acciones').innerHTML=(w?boton('gold','Escribirle a Yeimer',{href:w}):'')+nueva;return;
+    }
+    if(r.error==='pasada'){$('titulo').textContent='Esta cita ya pasó';$('subtitulo').textContent='Ya no se puede cancelar.';$('acciones').innerHTML=nueva;return;}
+    if(r.error==='enlace'){mostrar('invalido');return;}
+    throw new Error(r.error||'error');
+  }catch(e){
+    $('confirma').hidden=false;$('acciones').hidden=true;
+    si.disabled=false;si.textContent='Sí, cancelar mi cita';$('noCancelar').disabled=false;
+    $('error').textContent='No pude cancelar la cita. Revisa tu internet e intenta de nuevo, o escríbele a Yeimer por WhatsApp.';$('error').hidden=false;
+  }
+}
+$('siCancelar').addEventListener('click',cancelar);
+$('noCancelar').addEventListener('click',()=>{$('confirma').hidden=true;$('acciones').hidden=false;});
+$('reintentar').addEventListener('click',cargar);
+
+async function cargar(){
+  mostrar('cargando');
+  if(!API||TOKEN.length<20){mostrar('invalido');return;}
+  try{
+    const d=await pedir(`${API}?accion=cita&c=${encodeURIComponent(TOKEN)}`);
+    if(!d||!d.ok){mostrar('invalido');return;}
+    pintar(d);
+  }catch(e){mostrar('sinred');}
+}
+cargar();
+</script>
+</body>
+</html>

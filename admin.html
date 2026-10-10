@@ -143,9 +143,44 @@ h3.grp:first-of-type{margin-top:0;}
 /* ---- tabs ---- */
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(11,11,10,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);}
 .tabs-in{display:flex;max-width:640px;margin:0 auto;}
-.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 2px 8px;color:var(--fg-3);}
+.tab{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 2px 8px;color:var(--fg-3);}
+.badge{position:absolute;top:5px;left:calc(50% + 3px);min-width:17px;height:17px;border-radius:999px;background:var(--bad);color:#2a0f09;font-size:.62rem;font-weight:800;font-style:normal;display:grid;place-items:center;padding:0 4px;}
+.banner{display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(224,160,144,.1);border:1px solid rgba(224,160,144,.4);color:var(--bad);border-radius:14px;padding:12px 14px;font-size:.88rem;font-weight:600;margin-bottom:18px;width:100%;text-align:left;}
+.banner span:last-child{font-weight:700;text-decoration:underline;text-underline-offset:3px;white-space:nowrap;}
+.cobro{background:var(--bg-2);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:10px;}
+.cobro-top{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;}
+.cobro-top b{color:var(--accent);font-size:1.05rem;}
+.cobro-n{font-size:1rem;font-weight:600;}
+.chip{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:4px 9px;}
+.chip.rojo{background:rgba(224,160,144,.14);color:var(--bad);}
+.chip.verde{background:rgba(111,174,122,.14);color:var(--ok);}
+.chip.gris{background:rgba(242,238,230,.08);color:var(--fg-2);}
+.reinc{color:var(--bad);font-weight:600;}
+.pill.noshow{background:rgba(201,164,92,.12);color:var(--accent);}
+.pill.ok{background:rgba(111,174,122,.12);color:var(--ok);}
+.pill.neutral{background:rgba(242,238,230,.07);color:var(--fg-2);}
+.hist{margin-top:22px;}
+.hist summary{cursor:pointer;color:var(--fg-2);font-size:.88rem;padding:8px 0;list-style:none;}
+.hist summary::-webkit-details-marker{display:none;}
+.hist summary::before{content:'+ ';color:var(--accent);font-weight:700;}
+.hist[open] summary::before{content:'− ';}
+.tard{color:var(--bad);font-weight:600;}
+.sheet-ov{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;}
+.sheet-card{width:100%;max-width:480px;background:var(--bg-2);border-top:1px solid var(--line-2);border-radius:22px 22px 0 0;padding:24px 20px calc(22px + env(safe-area-inset-bottom,0px));max-height:92vh;overflow-y:auto;}
+.sheet-card h3{font-size:2rem;margin-bottom:6px;}
+.cx-sub{color:var(--fg-2);font-size:.9rem;line-height:1.5;margin-bottom:16px;}
+.opt-row{display:flex;gap:12px;align-items:flex-start;border:1px solid var(--line-2);border-radius:14px;padding:13px 14px;margin-bottom:8px;cursor:pointer;}
+.opt-row input{accent-color:var(--accent);width:20px;height:20px;margin-top:2px;flex:none;}
+.opt-row b{display:block;font-size:.95rem;}
+.opt-row small{display:block;color:var(--fg-3);font-size:.8rem;margin-top:2px;}
+.cx-result{border-radius:14px;padding:13px 15px;font-size:.88rem;line-height:1.55;margin:14px 0 18px;border:1px solid var(--line-2);color:var(--fg-2);}
+.cx-result.warn{border-color:rgba(224,160,144,.5);background:rgba(224,160,144,.08);color:var(--fg);}
+.cx-result.ok{border-color:rgba(111,174,122,.45);background:rgba(111,174,122,.07);color:var(--fg);}
+.cx-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.pol-prev{background:var(--bg-2);border:1px dashed var(--line-2);border-radius:12px;padding:12px 14px;font-size:.84rem;color:var(--fg-2);line-height:1.55;margin-top:8px;}
+.hint-warn{color:var(--bad);font-size:.8rem;margin:-4px 0 16px;line-height:1.45;}
 .tab svg{width:20px;height:20px;}
-.tab span{font-size:.62rem;font-weight:600;letter-spacing:.02em;}
+.tab span{font-size:.6rem;font-weight:600;letter-spacing:.01em;}
 .tab.on{color:var(--accent);}
 
 @media (min-width:720px){
@@ -180,6 +215,7 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(11,11
   <main class="wrap">
     <!-- HOY -->
     <section class="view on" id="v-hoy">
+      <button class="banner" id="bannerCobros" hidden></button>
       <h2 class="h display">Hoy</h2>
       <p class="sub" id="fechaHoy"></p>
       <div class="stats">
@@ -202,6 +238,14 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(11,11
       <h2 class="h display">Clientes</h2>
       <p class="sub">Ordenados por lo que han gastado contigo.</p>
       <div id="listaClientes"></div>
+    </section>
+
+    <!-- COBROS -->
+    <section class="view" id="v-cobros">
+      <h2 class="h display">Cobros</h2>
+      <p class="sub" id="cobrosSub"></p>
+      <div id="listaCobros"></div>
+      <details class="hist" id="histCobros" hidden><summary>Historial reciente</summary><div id="listaHistorial" style="margin-top:8px"></div></details>
     </section>
 
     <!-- CATALOGO -->
@@ -236,6 +280,15 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(11,11
       <div class="field"><label>Anticipación mínima para reservar (minutos)</label><input id="ajAviso" type="number" min="0" step="15"></div>
       <div class="field"><label>Hasta cuántos días adelante se puede agendar</label><input id="ajDiasAdelante" type="number" min="1" max="60"></div>
 
+      <h3 class="grp">Política de cancelación</h3>
+      <div class="field"><label>Horas para cancelar o cambiar sin costo</label><input id="ajCancelHoras" type="number" min="0" step="1"></div>
+      <div class="field"><label>Cargo por cancelar tarde o no estar ($)</label><input id="ajCancelCargo" type="number" min="0" step="1000"><p class="hint2">Pon 0 si no quieres cobrar nada.</p></div>
+      <p class="hint-warn" id="hintAviso" hidden></p>
+      <div class="field"><label>Texto de la política (lo ve el cliente al agendar)</label><textarea id="ajPolitica" style="min-height:140px"></textarea>
+        <p class="hint2">Escribe <b style="display:inline">{horas}</b> y <b style="display:inline">{cargo}</b> y se reemplazan solos por los valores de arriba.</p>
+        <div class="pol-prev" id="polPrev"></div></div>
+      <div class="field"><label>Dirección de tu página</label><input id="ajSitio" placeholder="https://tu-pagina.vercel.app"><p class="hint2">Se usa en los enlaces de "cancelar mi cita" de los correos y las invitaciones. Si cambias de dominio, actualízala aquí.</p></div>
+
       <h3 class="grp">Contacto y zona</h3>
       <div class="field"><label>Tu WhatsApp</label><input id="ajWhatsapp" inputmode="tel" placeholder="57XXXXXXXXXX"></div>
       <div class="field"><label>Correo donde te avisan las citas nuevas</label><input id="ajCorreo" type="email"></div>
@@ -257,11 +310,24 @@ nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(11,11
     <button class="tab on" data-v="hoy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg><span>Hoy</span></button>
     <button class="tab" data-v="semana"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 15h2M14 15h2"/></svg><span>Semana</span></button>
     <button class="tab" data-v="clientes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c1.5-4 4-5.6 7-5.6S18.5 16 20 20"/></svg><span>Clientes</span></button>
+    <button class="tab" data-v="cobros"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 6.8v10.4M14.9 9.4c-.4-.9-1.4-1.4-2.9-1.4-1.7 0-2.8.8-2.8 1.9 0 1.2 1.1 1.6 2.8 2s2.9.8 2.9 2.1c0 1.2-1.2 1.9-2.9 1.9-1.6 0-2.7-.6-3.1-1.6"/></svg><span>Cobros</span><i class="badge" id="badgeCobros" hidden>0</i></button>
     <button class="tab" data-v="catalogo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 4h9l7 7-9 9-7-7V4Z"/><circle cx="9" cy="9" r="1.4" fill="currentColor" stroke="none"/></svg><span>Carta</span></button>
     <button class="tab" data-v="ajustes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L14 3h-4l-.6 2.6a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9c.6.5 1.3.9 2 1.2L10 21h4l.6-2.6c.7-.3 1.4-.7 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2Z"/></svg><span>Ajustes</span></button>
   </div>
 </nav>
 
+<div class="sheet-ov" id="cancelOv" hidden>
+  <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="cxTitulo">
+    <h3 class="display" id="cxTitulo">Cancelar cita</h3>
+    <p class="cx-sub" id="cxSub"></p>
+    <div id="cxOpciones">
+      <label class="opt-row"><input type="radio" name="cxPor" value="cliente" checked><span><b>El cliente me avisó</b><small>Cuenta según cuánto faltaba para la cita.</small></span></label>
+      <label class="opt-row"><input type="radio" name="cxPor" value="yeimer"><span><b>Yo la cancelo</b><small>Sin ningún costo para el cliente.</small></span></label>
+    </div>
+    <div class="cx-result" id="cxResultado"></div>
+    <div class="cx-btns"><button class="btn line" id="cxVolver">Volver</button><button class="btn gold" id="cxConfirmar">Cancelar la cita</button></div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script src="datos.js"></script>
@@ -356,15 +422,22 @@ $('cerrarSesion').addEventListener('click',()=>{
 if(PIN){$('login').classList.add('abriendo');entrar();}
 
 /* ============================ tabs ============================ */
-document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{
-  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
-  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+t.dataset.v));
+function irATab(v){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
+  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
   window.scrollTo({top:0,behavior:'instant'});
-}));
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>irATab(t.dataset.v)));
 
 /* ============================ pintar todo ============================ */
 function pintarTodo(){
-  pintarHoy();pintarSemana();pintarClientes();pintarCatalogo();pintarAjustes();
+  pintarHoy();pintarSemana();pintarClientes();pintarCobros();pintarCatalogo();pintarAjustes();
+}
+const fmtDiaLargo=d=>new Date(d).toLocaleDateString('es-CO',{weekday:'long',day:'numeric',month:'long'});
+function horasTxt(h){
+  const min=Math.round(Math.abs(h)*60),hh=Math.floor(min/60),mm=min%60;
+  const t=hh&&mm?`${hh} h ${mm} min`:hh?`${hh} h`:`${mm} min`;
+  return h<0?`${t} después de la hora`:t;
 }
 function fmtHora(d){d=new Date(d);const H=d.getHours(),M=d.getMinutes();return `${((H+11)%12)+1}:${String(M).padStart(2,'0')} ${H<12?'am':'pm'}`;}
 function fmtDiaCorto(d){d=new Date(d);return `${DOW[d.getDay()]} ${d.getDate()}`;}
@@ -379,6 +452,7 @@ function tarjetaCita(c){
     <div class="cita-info">${esc(c.direccion)}</div>
     <div class="cita-actions">
       ${wa?`<a class="pill wa" href="https://wa.me/${wa}?text=${msg}" target="_blank" rel="noopener">WhatsApp</a>`:''}
+      ${new Date(c.ini).getTime()<=Date.now()?`<button class="pill noshow" data-nopresento="${esc(c.eventoId)}">No se presentó</button>`:''}
       <button class="pill cancel" data-cancelar="${esc(c.eventoId)}">Cancelar</button>
     </div>
   </div>`;
@@ -400,15 +474,109 @@ function pintarSemana(){
 function pintarClientes(){
   if(!panel.clientes.length){$('listaClientes').innerHTML='<p class="empty">Todavía no tienes clientes registrados.</p>';return;}
   $('listaClientes').innerHTML=panel.clientes.map(c=>`
-    <div class="cliente"><div><div class="n">${esc(c.nombre)}</div><div class="m">${c.visitas} visita${c.visitas>1?'s':''} · última el ${fmtDiaCorto(c.ultima)}</div></div>
+    <div class="cliente"><div><div class="n">${esc(c.nombre)}</div><div class="m">${c.visitas} visita${c.visitas>1?'s':''} · última el ${fmtDiaCorto(c.ultima)}${c.tardias>0?` · <span class="tard">${c.tardias} ${c.tardias>1?'cancelaciones tardías':'cancelación tardía'}</span>`:''}</div></div>
     <div class="t"><b class="num">${cop(c.total)}</b><span>en total</span></div></div>`).join('');
 }
+/* ============================ cancelar · no se presentó ============================ */
+let cx=null;   // {modo:'cancelar'|'nopresento', c:cita}
+const citaPorId=id=>[...panel.hoy,...panel.semana].find(x=>x.eventoId===id);
+function resultadoCancelacion(){
+  const c=cx.c,horas=(new Date(c.ini).getTime()-Date.now())/3600000,box=$('cxResultado');
+  if(cx.modo==='nopresento'){
+    box.className='cx-result warn';
+    box.textContent=c.cargoPol>0?`Quedará por cobrar ${cop(c.cargoPol)} en la pestaña Cobros. Tú decides después si cobras o perdonas.`:'Quedará registrada. La política no tiene cargo, así que no hay nada por cobrar.';
+    return;
+  }
+  const por=document.querySelector('input[name="cxPor"]:checked').value;
+  if(por==='yeimer'){box.className='cx-result ok';box.textContent='Sin ningún costo para el cliente. Si dejó correo, le llega el aviso de cancelación solo.';return;}
+  const tardia=horas<c.plazoH;
+  if(tardia&&c.cargoPol>0){box.className='cx-result warn';box.innerHTML=`<b>Cancelación tardía.</b> Faltan ${esc(horasTxt(horas))} y la política es de ${c.plazoH} h. Quedará por cobrar <b>${cop(c.cargoPol)}</b> en la pestaña Cobros: tú decides si cobras o perdonas.`;}
+  else if(tardia){box.className='cx-result';box.textContent=`Tardía (faltan ${horasTxt(horas)}), pero la política no tiene cargo: no hay nada por cobrar.`;}
+  else{box.className='cx-result ok';box.textContent=`A tiempo: faltan ${horasTxt(horas)} (la política es de ${c.plazoH} h). Sin cargo.`;}
+}
+function abrirSheet(modo,c){
+  cx={modo,c};
+  const horas=(new Date(c.ini).getTime()-Date.now())/3600000;
+  $('cxTitulo').textContent=modo==='cancelar'?'Cancelar cita':'No se presentó';
+  $('cxSub').textContent=`${c.nombre} · ${c.servicio} · ${fmtDiaCorto(c.ini)}, ${fmtHora(c.ini)}${modo==='cancelar'?` · Faltan ${horasTxt(horas)}`:''}`;
+  $('cxOpciones').hidden=modo!=='cancelar';
+  document.querySelector('input[name="cxPor"][value="cliente"]').checked=true;
+  $('cxConfirmar').textContent=modo==='cancelar'?'Cancelar la cita':'Marcar: no se presentó';
+  $('cxConfirmar').disabled=false;
+  resultadoCancelacion();
+  $('cancelOv').hidden=false;
+}
+const cerrarSheet=()=>{$('cancelOv').hidden=true;cx=null;};
+document.querySelectorAll('input[name="cxPor"]').forEach(r=>r.addEventListener('change',resultadoCancelacion));
+$('cxVolver').addEventListener('click',cerrarSheet);
+$('cancelOv').addEventListener('click',e=>{if(e.target.id==='cancelOv')cerrarSheet();});
+$('cxConfirmar').addEventListener('click',async()=>{
+  if(!cx)return;
+  const btn=$('cxConfirmar');btn.disabled=true;btn.textContent='Guardando…';
+  const {modo,c}=cx;
+  const body=modo==='cancelar'
+    ?{accion:'cancelar_cita',pin:PIN,eventoId:c.eventoId,por:document.querySelector('input[name="cxPor"]:checked').value}
+    :{accion:'no_se_presento',pin:PIN,eventoId:c.eventoId};
+  const r=await llamar(body).catch(()=>({ok:false}));
+  if(r.ok){
+    toast(modo==='nopresento'?(r.cargo>0?`Registrado. Quedó por cobrar ${cop(r.cargo)}.`:'Registrado.'):(r.tardia&&r.cargo>0?`Cancelada. Quedó por cobrar ${cop(r.cargo)}.`:'Cita cancelada.'));
+    cerrarSheet();recargar();
+  }else{
+    toast(r.error==='aun'?'Esa cita todavía no ha empezado.':'No se pudo guardar. Intenta de nuevo.');
+    btn.disabled=false;btn.textContent=modo==='cancelar'?'Cancelar la cita':'Marcar: no se presentó';
+  }
+});
+document.body.addEventListener('click',e=>{
+  const c1=e.target.closest('[data-cancelar]');
+  if(c1){const c=citaPorId(c1.dataset.cancelar);if(c)abrirSheet('cancelar',c);return;}
+  const c2=e.target.closest('[data-nopresento]');
+  if(c2){const c=citaPorId(c2.dataset.nopresento);if(c)abrirSheet('nopresento',c);return;}
+});
+
+/* ============================ cobros ============================ */
+function mensajeCobro(c){
+  const n=(c.nombre||'').split(' ')[0],cuando=`${fmtDiaLargo(c.ini)} a las ${fmtHora(c.ini)}`;
+  const base=c.tipo==='No se presentó'
+    ?`Hola ${n}, mi hermanito. Pasé por tu dirección a la hora de tu cita de ${c.servicio} (${cuando}) y no pude atenderte.`
+    :`Hola ${n}, mi hermanito. Tu cita de ${c.servicio} del ${cuando} quedó cancelada con menos de ${c.plazoH} horas de anticipación.`;
+  return `${base} Según la política que aceptaste al agendar, aplica un cargo de ${cop(c.cargo)} por el desplazamiento y el tiempo reservado. ¿Cómo te queda más fácil pagarlo, por Nequi o transferencia? Si fue una emergencia o un imprevisto, cuéntame y lo conversamos.`;
+}
+function tarjetaCobro(c,pendiente){
+  const wa=String(c.whatsapp||'').replace(/\D/g,'');
+  const avisoCon=c.tipo==='Canceló tarde'&&c.canceladaEn?`Avisó con ${horasTxt((new Date(c.ini)-new Date(c.canceladaEn))/3600000)} de anticipación (la política era de ${c.plazoH} h)`:'No estaba en la dirección a la hora de la cita';
+  const chip=pendiente?`<span class="chip rojo">${esc(c.tipo)}</span>`:`<span class="chip ${c.cobro==='Cobrado'?'verde':'gris'}">${esc(c.cobro)}</span>`;
+  return `<div class="cobro" data-ev="${esc(c.eventoId)}">
+    <div class="cobro-top">${chip}<b class="num">${cop(c.cargo)}</b></div>
+    <div class="cobro-n">${esc(c.nombre)}</div>
+    <div class="cita-info">${esc(c.servicio)} · ${fmtDiaCorto(c.ini)}, ${fmtHora(c.ini)}</div>
+    <div class="cita-info">${esc(avisoCon)}</div>
+    ${c.tardias>=2?`<div class="cita-info reinc">${c.tardias}.ª cancelación tardía de este cliente</div>`:''}
+    <div class="cita-actions">
+      ${pendiente
+        ?`${wa?`<a class="pill wa" href="https://wa.me/${wa}?text=${encodeURIComponent(mensajeCobro(c))}" target="_blank" rel="noopener">WhatsApp</a>`:''}
+          <button class="pill ok" data-cobro="Cobrado" data-ev="${esc(c.eventoId)}">Cobrado</button>
+          <button class="pill neutral" data-cobro="Perdonado" data-ev="${esc(c.eventoId)}">Perdonar</button>`
+        :`<button class="pill neutral" data-cobro="Por cobrar" data-ev="${esc(c.eventoId)}">Deshacer</button>`}
+    </div>
+  </div>`;
+}
+function pintarCobros(){
+  const co=panel.cobros||{pendientes:[],historial:[],cantidad:0,total:0};
+  $('cobrosSub').textContent=co.cantidad?`${co.cantidad} por cobrar · ${cop(co.total)} en total. Tú decides si cobras o perdonas cada uno.`:'No tienes cobros pendientes.';
+  $('listaCobros').innerHTML=co.cantidad?co.pendientes.map(c=>tarjetaCobro(c,true)).join(''):'<p class="empty">Cuando alguien cancele tarde o no se presente, aparece aquí.</p>';
+  $('histCobros').hidden=!co.historial.length;
+  $('listaHistorial').innerHTML=co.historial.map(c=>tarjetaCobro(c,false)).join('');
+  const b=$('badgeCobros');b.hidden=!co.cantidad;b.textContent=co.cantidad;
+  const bn=$('bannerCobros');bn.hidden=!co.cantidad;
+  bn.innerHTML=co.cantidad?`<span>${co.cantidad} cobro${co.cantidad>1?'s':''} pendiente${co.cantidad>1?'s':''} · ${cop(co.total)}</span><span>Ver</span>`:'';
+}
+$('bannerCobros').addEventListener('click',()=>irATab('cobros'));
 document.body.addEventListener('click',async e=>{
-  const b=e.target.closest('[data-cancelar]');if(!b)return;
-  if(!confirm('¿Cancelar esta cita? Si el cliente dejó correo, le llega el aviso de cancelación solo.'))return;
-  b.textContent='Cancelando…';b.disabled=true;
-  const r=await llamar({accion:'cancelar_cita',pin:PIN,eventoId:b.dataset.cancelar}).catch(()=>({ok:false}));
-  if(r.ok){toast('Cita cancelada.');recargar();}else{toast('No se pudo cancelar.');b.textContent='Cancelar';b.disabled=false;}
+  const b=e.target.closest('[data-cobro]');if(!b)return;
+  b.disabled=true;
+  const r=await llamar({accion:'marcar_cobro',pin:PIN,eventoId:b.dataset.ev,estado:b.dataset.cobro}).catch(()=>({ok:false}));
+  if(r.ok){toast(b.dataset.cobro==='Cobrado'?'Marcado como cobrado.':b.dataset.cobro==='Perdonado'?'Cargo perdonado.':'Vuelve a quedar por cobrar.');recargar();}
+  else{toast('No se pudo guardar.');b.disabled=false;}
 });
 
 /* ============================ catálogo editable ============================ */
@@ -478,9 +646,19 @@ function pintarAjustes(){
   const horas=(a.horas_inicio||'').split(',').map(s=>s.trim()).filter(Boolean);
   pintarHoras(horas);
   $('ajDuracion').value=a.duracion_min;$('ajAviso').value=a.aviso_min;$('ajDiasAdelante').value=a.dias_adelante;
+  $('ajCancelHoras').value=a.cancel_horas;$('ajCancelCargo').value=a.cancel_cargo;$('ajPolitica').value=a.politica_texto||'';$('ajSitio').value=a.sitio_url||'';
+  pintarVistaPolitica();
   $('ajWhatsapp').value=a.whatsapp||'';$('ajCorreo').value=a.correo_avisos||'';$('ajZona').value=a.zona_cobertura||'';$('ajNota').value=a.nota_servicios||'';
   $('nuevoPin').value='';
 }
+function pintarVistaPolitica(){
+  const hs=$('ajCancelHoras').value,cg=Number($('ajCancelCargo').value)||0;
+  $('polPrev').textContent='Así lo ve el cliente: '+($('ajPolitica').value||'').replace(/\{horas\}/g,hs===''?'4':hs).replace(/\{cargo\}/g,cop(cg));
+  const aviso=Number($('ajAviso').value)||0,plazo=Number(hs)||0,w=$('hintAviso');
+  if(plazo>0&&aviso<plazo*60){w.hidden=false;w.textContent=`Ojo: hoy se puede agendar con solo ${aviso} minutos de anticipación, menos que el plazo de ${plazo} horas. Esas citas nacerían ya dentro del plazo de cancelación, con cargo. Para evitarlo, pon la "Anticipación mínima para reservar" en ${plazo*60} minutos.`;}
+  else w.hidden=true;
+}
+['ajCancelHoras','ajCancelCargo','ajPolitica','ajAviso'].forEach(id=>$(id).addEventListener('input',pintarVistaPolitica));
 function pintarHoras(horas){
   horas.sort();
   $('slotEdit').innerHTML=horas.map(h=>`<span class="chip" data-h="${h}">${h}<button data-quitar-hora>✕</button></span>`).join('')||'<p class="empty" style="padding:14px">Sin horas configuradas.</p>';
@@ -534,7 +712,10 @@ $('guardarAjustes').addEventListener('click',async()=>{
       dias_cerrados:cerrados.join(','), horas_inicio:horas.join(','),
       duracion_min:$('ajDuracion').value, aviso_min:$('ajAviso').value, dias_adelante:$('ajDiasAdelante').value,
       whatsapp:$('ajWhatsapp').value.replace(/\D/g,''), correo_avisos:$('ajCorreo').value.trim(),
-      zona_cobertura:$('ajZona').value.trim(), nota_servicios:$('ajNota').value.trim()
+      zona_cobertura:$('ajZona').value.trim(), nota_servicios:$('ajNota').value.trim(),
+      cancel_horas:$('ajCancelHoras').value===''?String(panel.ajustes.cancel_horas):$('ajCancelHoras').value,
+      cancel_cargo:String(Number($('ajCancelCargo').value)||0),
+      politica_texto:$('ajPolitica').value.trim(), sitio_url:$('ajSitio').value.trim()
     };
     const r=await llamar({accion:'guardar_ajustes',pin:PIN,valores});
     let ok=r.ok;

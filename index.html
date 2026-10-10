@@ -254,6 +254,11 @@ footer{padding:28px 0 calc(110px + env(safe-area-inset-bottom,0px));}
 .consent input:checked::after{content:'✓';color:var(--on-accent);font-size:.8rem;font-weight:800;}
 .consent a{color:var(--fg);text-decoration:underline;text-underline-offset:2px;}
 .consent.err input{border-color:#c26a5a;}
+.policy{border:1px solid var(--line-2);border-radius:14px;padding:14px 16px;background:var(--bg-2);margin-top:6px;}
+.policy b{display:block;font-size:.7rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+.policy p{font-size:.84rem;color:var(--fg-2);line-height:1.55;}
+.cancel-note{margin-top:14px;padding:13px 14px;border-radius:12px;background:var(--bg);font-size:.82rem;color:var(--fg-2);line-height:1.55;}
+.cancel-note a{display:inline-block;margin-top:8px;color:var(--fg);text-decoration:underline;text-underline-offset:3px;font-weight:600;}
 .hp{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
 .skel{border-radius:14px;background:linear-gradient(90deg,var(--bg-2) 0%,var(--bg-3) 50%,var(--bg-2) 100%);background-size:200% 100%;animation:sk 1.3s linear infinite;}
 .svc-list .skel{height:74px;}
@@ -326,6 +331,8 @@ footer{padding:28px 0 calc(110px + env(safe-area-inset-bottom,0px));}
           <div class="field full"><input id="fMail" type="email" inputmode="email" placeholder=" " autocomplete="email" maxlength="120"><label for="fMail">Correo <span class="opt-lbl">(la cita te llega a tu calendario)</span></label></div>
           <details class="note-toggle full"><summary>Agregar una nota</summary><div class="field"><textarea id="fNote" placeholder=" " maxlength="500"></textarea><label for="fNote">Portón, referencia, cómo te gusta el corte…</label></div></details>
           <div class="hp" aria-hidden="true"><input id="fWeb" tabindex="-1" autocomplete="off"></div>
+          <div class="policy full" id="polBox" hidden><b>Política de cancelación</b><p id="polTxt"></p></div>
+          <label class="consent full" id="polConsent" hidden><input type="checkbox" id="fPol"><span>Acepto la política de cancelación.</span></label>
           <label class="consent full" id="consentBox"><input type="checkbox" id="fOk"><span>Autorizo el tratamiento de mis datos para agendar y recordarme la cita, según la <a href="politica.html" target="_blank">política de datos</a>.</span></label>
         </div>
       </section>
@@ -373,6 +380,7 @@ footer{padding:28px 0 calc(110px + env(safe-area-inset-bottom,0px));}
     <h3 class="display" id="mTitle">¡Listo, mi hermanito!</h3>
     <p class="sub" id="mSub"></p>
     <div id="mDetail"></div>
+    <div class="cancel-note" id="mCancel" hidden></div>
     <p class="demo-note" id="demoNote" hidden>Modo demo: esta cita no se guardó en el calendario.</p>
     <a class="btn btn-accent" id="waBtn" target="_blank" rel="noopener" hidden>Avisarle por WhatsApp</a>
     <button class="btn btn-line" id="mClose">Cerrar</button>
@@ -486,6 +494,13 @@ function pintarCatalogo(){
   $('extras').hidden=!PRODUCTS.length;
   sync();
 }
+let POLITICA=null,AVISO_MIN=0;
+const anticipacionTxt=m=>{if(!m)return '';if(m<60)return `${m} minutos`;const h=m/60;return Number.isInteger(h)?`${h} hora${h>1?'s':''}`:`${String(Math.round(h*10)/10).replace('.',',')} horas`;};
+function pintarPolitica(){
+  const on=!!(POLITICA&&POLITICA.texto);
+  $('polBox').hidden=!on;$('polConsent').hidden=!on;
+  if(on)$('polTxt').textContent=POLITICA.texto;
+}
 const CLAVE_CAT='yeimer_catalogo_v1';
 let agendaFirma='';
 function aplicarCatalogo(d){
@@ -497,6 +512,7 @@ function aplicarCatalogo(d){
   const firma=JSON.stringify([d.agenda&&d.agenda.diasAdelante,d.agenda&&d.agenda.diasCerrados]);
   if(firma!==agendaFirma){agendaFirma=firma;construirDias(d.agenda&&d.agenda.diasAdelante,d.agenda&&d.agenda.diasCerrados);}
   if(st.svc&&!SERVICES.some(s=>s.id===st.svc)){st.svc=null;st.slot=null;}   // el corte que había escogido ya no existe
+  POLITICA=d.politica||null;AVISO_MIN=(d.agenda&&d.agenda.avisoMin)||0;pintarPolitica();
   pintarCatalogo();
 }
 async function cargarCatalogo(){
@@ -584,6 +600,7 @@ $('slots').addEventListener('click',e=>{
 /* ============================ datos del cliente ============================ */
 ['fName','fTel','fDir','fMail'].forEach(id=>$(id).addEventListener('input',()=>{$(id).parentElement.classList.remove('err');sync();}));
 $('fOk').addEventListener('change',()=>{$('consentBox').classList.remove('err');sync();});
+$('fPol').addEventListener('change',()=>{$('polConsent').classList.remove('err');sync();});
 const telOk=()=>$('fTel').value.replace(/\D/g,'').length>=10;
 const mailOk=()=>{const v=$('fMail').value.trim();return !v||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);};
 
@@ -602,6 +619,7 @@ function nextStep(){
   if(!telOk())return{label:'Revisa tu WhatsApp',go:()=>marcar('fTel')};
   if(!$('fDir').value.trim())return{label:'Completar mis datos',go:()=>marcar('fDir')};
   if(!mailOk())return{label:'Revisa tu correo',go:()=>marcar('fMail')};
+  if(POLITICA&&!$('fPol').checked)return{label:'Aceptar política de cancelación',go:()=>{jump('datos');$('polConsent').classList.add('err');}};
   if(!$('fOk').checked)return{label:'Aceptar política de datos',go:()=>{jump('datos');$('consentBox').classList.add('err');}};
   return{label:'Confirmar cita',ready:true,go:confirmar};
 }
@@ -611,7 +629,7 @@ function sync(){
   $('corte').classList.toggle('done',!!s);
   $('extras').classList.toggle('done',n>0);
   $('cuando').classList.toggle('done',!!st.day&&st.slot!=null);
-  $('datos').classList.toggle('done',!!$('fName').value.trim()&&telOk()&&!!$('fDir').value.trim()&&mailOk()&&$('fOk').checked);
+  $('datos').classList.toggle('done',!!$('fName').value.trim()&&telOk()&&!!$('fDir').value.trim()&&mailOk()&&$('fOk').checked&&(!POLITICA||$('fPol').checked));
   const rows=[];
   if(s)rows.push([s.nombre,precioTxt(s)]);
   PRODUCTS.forEach(p=>{if(st.prod[p.id])rows.push([`${p.nombre} ×${st.prod[p.id]}`,p.precio*st.prod[p.id]]);});
@@ -621,7 +639,8 @@ function sync(){
   $('sumTotal').textContent=cop(t);
   $('sumTotalLbl').textContent=rango?'Total desde':'Total';
   $('sumSub').hidden=!rango;$('sumSub').textContent=rango?`Puede llegar hasta ${cop(tMax)} según el trabajo`:'';
-  $('txtDurP').textContent=s?`Horas libres de mi calendario. Tu cita dura ${durDe(s)} minutos.`:'Horas libres de mi calendario. Escoge primero tu corte.';
+  const aviso=AVISO_MIN?` Para hoy, agenda con al menos ${anticipacionTxt(AVISO_MIN)} de anticipación.`:'';
+  $('txtDurP').textContent=(s?`Horas libres de mi calendario. Tu cita dura ${durDe(s)} minutos.`:'Horas libres de mi calendario. Escoge primero tu corte.')+aviso;
   $('bar').classList.toggle('up',!!s);
   $('barSub').textContent=s?(s.nombre+(n?` + ${n} producto${n>1?'s':''}`:'')):'';
   $('barTotal').textContent=(rango?'Desde ':'')+cop(t);
@@ -644,7 +663,7 @@ async function confirmar(){
   const texto=PRODUCTS.filter(p=>st.prod[p.id]).map(p=>`${p.nombre} ×${st.prod[p.id]}`).join(', ')||'Nada';
   const cita={fecha:iso(st.day),inicio:st.slot,servicioId:s.id,productos,
     nombre:$('fName').value.trim(),telefono:$('fTel').value.trim(),direccion:$('fDir').value.trim(),
-    correo:$('fMail').value.trim(),nota:$('fNote').value.trim(),consentimiento:$('fOk').checked,web:$('fWeb').value};
+    correo:$('fMail').value.trim(),nota:$('fNote').value.trim(),consentimiento:$('fOk').checked,aceptaPolitica:POLITICA?$('fPol').checked:undefined,web:$('fWeb').value};
 
   st.enviando=true;sync();
   let res={ok:true,correo:!!cita.correo};
@@ -657,6 +676,7 @@ async function confirmar(){
   if(!res||!res.ok){
     const e=res&&res.error;
     if(e==='ocupado'){error('Justo acaban de tomar esa hora, mi hermanito. Escoge otra.');st.slot=null;sync();cargarHoras();jump('cuando');}
+    else if(e==='politica'){error('Falta aceptar la política de cancelación.');jump('datos');$('polConsent').classList.add('err');}
     else if(e==='red')error('No hubo conexión con la agenda. Revisa tu internet e intenta de nuevo, o escríbeme por WhatsApp.');
     else error('No pude agendar la cita. Intenta de nuevo o escríbeme por WhatsApp.');
     return;
@@ -670,6 +690,14 @@ async function confirmar(){
   $('mDetail').innerHTML=[['Corte',esc(s.nombre)],['Cuándo',`${fmtDay(st.day)}<br>${hm(st.slot)} – ${hm(st.slot+durDe(s))}`],['Dónde',esc(cita.direccion)],['Te llevo',esc(texto)],['Total',`<b style="color:var(--accent)">${totalTxt}</b>`]]
     .map(r=>`<div class="ev"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('');
   $('demoNote').hidden=!!API;
+  // Cómo cancelar o cambiar la cita, con el enlace y el plazo sin costo
+  const mc=$('mCancel');
+  if(API&&res.plazoH!=null){
+    let txt='';
+    if(res.cargo>0)txt=res.sinCostoAun?`Puedes cancelar o cambiar tu cita sin costo hasta el ${res.limite}. Después, el cargo es de ${cop(res.cargo)}.`:`Como agendaste con poco tiempo, cancelar tendría un cargo de ${cop(res.cargo)}.`;
+    mc.innerHTML=esc(txt)+(res.cancelUrl?`${txt?'<br>':''}<a href="${esc(res.cancelUrl)}">Cancelar o cambiar mi cita</a>`:'');
+    mc.hidden=!mc.innerHTML;
+  }else mc.hidden=true;
   const wa=String(WA).replace(/\D/g,'');
   if(wa.length>=10){
     const msg=`Hola Yeimer! Agendé ${s.nombre} para el ${fmtDay(st.day)} a las ${hm(st.slot)}.\nDirección: ${cita.direccion}\nProductos: ${texto}\nTotal: ${totalTxt}\nSoy ${cita.nombre}`;

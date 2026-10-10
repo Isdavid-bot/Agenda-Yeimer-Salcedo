@@ -4,6 +4,7 @@
 
 ```
 index.html            La página pública (no hace falta tocarla)
+cancelar.html         Página a la que llega el cliente desde su correo para cancelar o cambiar su cita
 admin.html            El Panel de Yeimer — celular, protegido con PIN
 politica.html         Política de datos (Ley 1581)
 datos.js              Textos de marca, redes y la URL de la agenda
@@ -39,6 +40,30 @@ Es una página aparte, protegida con un **PIN de 4 a 8 dígitos**, pensada para 
 - **Ajustes:** qué días no trabaja, a qué horas puede empezar una cita, cuánto dura cada una, la anticipación mínima, su WhatsApp, el correo donde le llegan los avisos, la zona de cobertura y el texto de nota en la página. También puede cambiar el PIN ahí mismo.
 
 El PIN que trae por defecto es `1234` — es lo primero que hay que cambiar, en *Ajustes → Seguridad*. Como es solo un PIN (no un usuario con contraseña de verdad), no lo compartas fuera del círculo de confianza; para una barbería es un nivel de protección razonable, no bancario.
+
+### Política de cancelación
+
+**Qué ve el cliente.** Al agendar (paso 4) aparece la política y una casilla "Acepto la política de cancelación" que debe marcar. Esa aceptación queda guardada en la hoja *Citas* (cuándo aceptó, y con qué plazo y cargo: las columnas `AceptoEn`, `PlazoH` y `CargoPol`). La política vuelve a aparecer en la confirmación, en la invitación del calendario y en el recordatorio de 24 horas, siempre con un botón **"Cancelar o cambiar mi cita"**.
+
+**Valores de arranque:** 4 horas de plazo sin costo y $20.000 de cargo. Se cambian en *Panel → Ajustes → Política de cancelación* (plazo, cargo, el texto completo y la dirección de la página). En el texto se escribe `{horas}` y `{cargo}` y se reemplazan solos. Cada cita se rige por la política que aceptó al agendar: si luego cambias los valores, solo aplican a las citas nuevas.
+
+**Cómo puede cancelar un cliente**
+- **Con el enlace** del correo o de la invitación (`cancelar.html`). Si falta más del plazo, cancela sin costo y la hora queda libre al instante. Si falta menos, la página le advierte el cargo y le ofrece primero escribirle a Yeimer; si cancela igual, queda registrado como tardía.
+- **Respondiendo "No"** a la invitación de Google Calendar: se detecta cada hora y cuenta como cancelación suya (el momento que cuenta es cuando se detecta).
+- **Avisándole a Yeimer por WhatsApp.** Entonces Yeimer la registra en el Panel (ver abajo).
+
+**Cómo cobra Yeimer.** El sistema no cobra solo: detecta, prepara y deja que Yeimer decida.
+- Cuando alguien cancela tarde, a Yeimer le llega un correo "⚠️ Cancelación TARDÍA" y aparece en *Panel → Cobros* (también como número rojo en la pestaña y un aviso arriba de *Hoy*).
+- Cada cobro tiene un botón de **WhatsApp** con el mensaje ya escrito (recuerda la política aceptada, el valor, pregunta si paga por Nequi o transferencia, e invita a contar si fue una emergencia), y los botones **Cobrado** y **Perdonar**. Lo ya resuelto queda en el historial, con "Deshacer".
+- En *Clientes* se ve cuántas cancelaciones tardías tiene cada uno. Sugerencia de uso: la primera vez, perdonar y avisar; desde la segunda, cobrar. Pero lo decide él.
+
+**Desde el Panel**
+- **Cancelar** una cita abre una hoja que pregunta *"¿El cliente me avisó?"* o *"¿Yo la cancelo?"*. Si el cliente avisó, muestra en el momento si es **a tiempo** o **tardía** (según cuántas horas faltan) y cuánto quedaría por cobrar, antes de confirmar. Si Yeimer cancela, nunca hay cargo.
+- **No se presentó:** aparece en las citas que ya empezaron. Queda por cobrar igual que una cancelación tardía.
+
+**Recomendación:** pon la *Anticipación mínima para reservar* (Ajustes) al menos igual al plazo de cancelación (4 horas = 240 minutos). Si no, alguien puede agendar con menos de 4 horas de anticipación y esa cita nace ya dentro del plazo con cargo. El Panel te avisa si están desalineados.
+
+**Límites:** reprogramar es cancelar y agendar de nuevo (o hablar por WhatsApp). La cancelación por "No" en el calendario puede tardar hasta una hora en detectarse. Para citas muy tempranas (8:00 am), un plazo de 4 horas cae de madrugada (4:00 am): en la práctica, el cliente debe cancelar la noche anterior.
 
 ### Instalar el Panel como app en el celular
 
@@ -151,4 +176,6 @@ Meta cobra por cada mensaje de este tipo (valores bajos, se consultan en su pág
 - [ ] En el Panel → Ajustes: WhatsApp real, correo de avisos, horario real, días libres reales
 - [ ] En el Panel → Carta: precios y productos reales de Yeimer
 - [ ] 2 o 3 reservas de prueba → revisar Calendar, pestaña Citas y correos → cancelarlas desde el Panel
+- [ ] Revisar la política en *Ajustes* (plazo, cargo y texto) y poner la anticipación mínima en 240 minutos
+- [ ] Hacer una reserva de prueba, cancelarla con el enlace del correo y ver cómo llega a *Cobros*
 - [ ] Link en la bio de Instagram, TikTok y Facebook
