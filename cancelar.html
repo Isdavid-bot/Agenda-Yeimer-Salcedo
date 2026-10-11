@@ -111,7 +111,7 @@ function horasTxt(h){
   const t=hh&&mm?`${hh} h ${mm} min`:hh?`${hh} h`:`${mm} min`;
   return t;
 }
-async function pedir(url,opts={},ms=20000){
+async function pedir(url,opts={},ms=30000){
   const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),ms);
   try{const r=await fetch(url,{...opts,signal:ctl.signal,redirect:'follow'});return await r.json();}
   finally{clearTimeout(tm);}
@@ -205,11 +205,15 @@ $('reintentar').addEventListener('click',cargar);
 async function cargar(){
   mostrar('cargando');
   if(!API||TOKEN.length<20){mostrar('invalido');return;}
-  try{
-    const d=await pedir(`${API}?accion=cita&c=${encodeURIComponent(TOKEN)}`);
-    if(!d||!d.ok){mostrar('invalido');return;}
-    pintar(d);
-  }catch(e){mostrar('sinred');}
+  // Google Apps Script tarda más la primera vez que despierta: se intenta hasta 3 veces antes de rendirse
+  let d=null,ultimo=null;
+  for(let i=0;i<3&&!d;i++){
+    try{d=await pedir(`${API}?accion=cita&t=${encodeURIComponent(TOKEN)}`);}
+    catch(e){ultimo=e;console.warn('cancelar: intento',i+1,e);await new Promise(r=>setTimeout(r,1500));}
+  }
+  if(!d){mostrar('sinred');return;}
+  if(!d.ok){mostrar('invalido');return;}
+  try{pintar(d);}catch(e){console.error('cancelar: error al mostrar la cita',e);mostrar('sinred');}
 }
 cargar();
 </script>
