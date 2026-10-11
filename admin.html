@@ -705,7 +705,7 @@ function pintarInstalar(){
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();promptInstalar=e;if(panel)pintarInstalar();});
 addEventListener('appinstalled',()=>{promptInstalar=null;if(panel)pintarInstalar();});
 if('serviceWorker' in navigator){
-  addEventListener('load',()=>{navigator.serviceWorker.register('admin-sw.js',{scope:'admin.html'}).catch(()=>{});});
+  addEventListener('load',()=>{navigator.serviceWorker.register('admin-sw.js',{scope:'./'}).catch(()=>{});});
 }
 
 $('guardarAjustes').addEventListener('click',async()=>{

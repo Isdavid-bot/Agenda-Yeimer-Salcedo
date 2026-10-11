@@ -5,7 +5,7 @@
   "lang": "es-CO",
   "dir": "ltr",
   "start_url": "admin.html",
-  "scope": "admin.html",
+  "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0b0b0a",

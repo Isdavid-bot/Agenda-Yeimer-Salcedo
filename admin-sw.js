@@ -4,13 +4,14 @@
 
    Lo que NUNCA toca:
    - Las llamadas a Google (agenda, clientes, citas): siempre van directo a internet, nunca se guardan.
-   - La página pública de clientes (index.html): este service worker solo controla admin.html.
+   - La página pública de clientes (index.html): solo responde por los archivos listados abajo; todo lo demás va directo a internet.
    Los archivos del Panel se piden primero a internet y la copia guardada solo se usa si falla,
    así que cuando se publica una versión nueva, se ve de una. */
 
-const VERSION = 'panel-v1';
+const VERSION = 'panel-v2';
 const BASE = self.location.href;                       // .../admin-sw.js
-const ARCHIVOS = ['admin.html', 'datos.js', 'admin.webmanifest', 'icons/admin-192.png', 'icons/admin-512.png']
+// 'admin' sin .html: Cloudflare Pages (y otros) quitan la extensión de la dirección
+const ARCHIVOS = ['admin.html', 'admin', 'datos.js', 'admin.webmanifest', 'icons/admin-192.png', 'icons/admin-512.png']
   .map(f => new URL(f, BASE).href);
 
 self.addEventListener('install', e => {
