@@ -37,7 +37,7 @@ const DATOS = {
   agenda: {
     // Pega aquí la URL de la aplicación web de Apps Script (termina en /exec).
     // Vacío = MODO DEMO (horarios de ejemplo, no agenda nada).
-    apiUrl: "https://script.google.com/macros/s/AKfycbzYgvD_uWPQ5fMMDgZJcXdrQBtA2JGrfde2qev_pjmkKReLsUFeOZVeyePBa-goj3YDkQ/exechttps://script.google.com/macros/s/AKfycbzYgvD_uWPQ5fMMDgZJcXdrQBtA2JGrfde2qev_pjmkKReLsUFeOZVeyePBa-goj3YDkQ/exec",
+    apiUrl: "https://script.google.com/macros/s/AKfycbzYgvD_uWPQ5fMMDgZJcXdrQBtA2JGrfde2qev_pjmkKReLsUFeOZVeyePBa-goj3YDkQ/exec",
     diasAdelante: 14,
     diasCerrados: [0]            // 0 = domingo (debe coincidir con el Apps Script)
   },
