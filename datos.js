@@ -24,8 +24,8 @@ const DATOS = {
   },
 
   contacto: {
-    whatsapp: "57XXXXXXXXXX",   // solo para modo demo; el real va en la hoja (Ajustes)
-    correo: "",                  // correo de Yeimer para la política de datos
+    whatsapp: "573143268040",   // solo para modo demo; el real va en la hoja (Ajustes)
+    correo: "yeimersalcedooficialmail.com",                  // correo de Yeimer para la política de datos
     instagram: "https://www.instagram.com/yeimersalcedooficial",
     instagramUsuario: "@yeimersalcedooficial",
     tiktok: "https://www.tiktok.com/@yeimersalcedooficial",
@@ -37,7 +37,7 @@ const DATOS = {
   agenda: {
     // Pega aquí la URL de la aplicación web de Apps Script (termina en /exec).
     // Vacío = MODO DEMO (horarios de ejemplo, no agenda nada).
-    apiUrl: "https://script.google.com/macros/s/AKfycbw4V2vAVoArUxTCnIcXQQxv_zMypJHhPjyJE1CXxdvCHLu08c74xNXh_MUxmYa96bXd/exec",
+    apiUrl: "https://script.google.com/macros/s/AKfycbzYgvD_uWPQ5fMMDgZJcXdrQBtA2JGrfde2qev_pjmkKReLsUFeOZVeyePBa-goj3YDkQ/exechttps://script.google.com/macros/s/AKfycbzYgvD_uWPQ5fMMDgZJcXdrQBtA2JGrfde2qev_pjmkKReLsUFeOZVeyePBa-goj3YDkQ/exec",
     diasAdelante: 14,
     diasCerrados: [0]            // 0 = domingo (debe coincidir con el Apps Script)
   },
